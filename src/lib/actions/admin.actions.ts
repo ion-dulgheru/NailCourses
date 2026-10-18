@@ -140,7 +140,10 @@ async function removeUnusedVideos(videoKeys: (string | null)[]) {
 }
 
 async function videoKeysOf(where: { lesson: { courseId: string } } | { lessonId: string }) {
-  const blocks = await prisma.lessonBlock.findMany({ where: { ...where, type: "video" }, select: { videoKey: true } });
+  const blocks = await prisma.lessonBlock.findMany({
+    where: { ...where, type: { in: ["video", "pdf"] } },
+    select: { videoKey: true },
+  });
   return blocks.map((b) => b.videoKey);
 }
 
@@ -262,6 +265,16 @@ const blockSchema = z.discriminatedUnion("type", [
       .max(500)
       .refine((v) => parseVideoSource(v) !== null, "Folosește un link YouTube sau numele fișierului din spațiul de stocare"),
   }),
+  z.object({
+    type: z.literal("pdf"),
+    text: z.string().trim().min(1, "Scrie numele materialului (ex: Fișa de lucru)").max(200),
+    videoKey: z
+      .string()
+      .trim()
+      .min(1, "Încarcă fișierul PDF")
+      .max(500)
+      .refine((v) => parseVideoSource(v)?.kind === "fisier" && /\.pdf$/i.test(v), "Încarcă un fișier PDF"),
+  }),
 ]);
 
 export async function saveBlock(prev: AdminFormState, formData: FormData): Promise<AdminFormState> {
@@ -279,7 +292,7 @@ export async function saveBlock(prev: AdminFormState, formData: FormData): Promi
 
   // O greșeală de scriere în numele fișierului s-ar vedea abia la elevă; o prindem la salvare.
   // Doar când numele se schimbă, ca adminul să poată edita legenda înainte să urce fișierul.
-  if (parsed.data.type === "video") {
+  if (parsed.data.type === "video" || parsed.data.type === "pdf") {
     const source = parseVideoSource(parsed.data.videoKey);
     const changed = current?.videoKey?.trim() !== parsed.data.videoKey;
     if (source?.kind === "fisier" && changed && (await videoExists(source.key)) === false) {
@@ -295,12 +308,12 @@ export async function saveBlock(prev: AdminFormState, formData: FormData): Promi
   const data = {
     type: parsed.data.type,
     text: parsed.data.text,
-    videoKey: parsed.data.type === "video" ? parsed.data.videoKey : null,
+    videoKey: parsed.data.type === "video" || parsed.data.type === "pdf" ? parsed.data.videoKey : null,
   };
 
   if (blockId) {
     await prisma.lessonBlock.update({ where: { id: blockId }, data });
-    // Videoclipul înlocuit nu mai e folosit: fișierul vechi se șterge din R2.
+    // Fișierul înlocuit (video sau PDF) nu mai e folosit: se șterge din R2.
     if (current?.videoKey && current.videoKey !== data.videoKey) await removeUnusedVideos([current.videoKey]);
   } else {
     const last = await prisma.lessonBlock.aggregate({ where: { lessonId }, _max: { position: true } });
@@ -311,29 +324,43 @@ export async function saveBlock(prev: AdminFormState, formData: FormData): Promi
   return { ok: true, message: blockId ? "Blocul a fost salvat." : "Blocul a fost adăugat." };
 }
 
-// ─── Încărcarea videoclipurilor în R2 ───────────────────────────────────────
+// ─── Încărcarea fișierelor (video, PDF) în R2 ────────────────────────────────
 
-const VIDEO_TYPES: Record<string, string> = { "video/mp4": "mp4", "video/webm": "webm", "video/quicktime": "mov" };
+const UPLOAD_KINDS = {
+  video: {
+    types: { "video/mp4": "mp4", "video/webm": "webm", "video/quicktime": "mov" } as Record<string, string>,
+    maxBytes: MAX_UPLOAD_BYTES,
+    wrongType: "Alege un fișier video MP4, WebM sau MOV.",
+    tooBig: "Fișierul depășește 5 GB. Micșorează-l (export la 1080p) și încearcă din nou.",
+  },
+  pdf: {
+    types: { "application/pdf": "pdf" } as Record<string, string>,
+    maxBytes: 100 * 1024 ** 2,
+    wrongType: "Alege un fișier PDF.",
+    tooBig: "PDF-ul depășește 100 MB. Micșorează-l (ex: „Salvează ca PDF redus”) și încearcă din nou.",
+  },
+};
 
-export type VideoUploadResult = { ok: true; url: string; key: string } | { ok: false; message: string };
+export type UploadResult = { ok: true; url: string; key: string } | { ok: false; message: string };
 
 // Emite linkul de încărcare doar dacă fișierul încape în limita de 10 GB a spațiului de stocare.
-// Fișierul urcă direct din browser în R2 (nu prin server), apoi cheia se pune în blocul video.
-export async function requestVideoUpload(input: {
+// Fișierul urcă direct din browser în R2 (nu prin server), apoi cheia se pune în bloc.
+export async function requestUpload(input: {
   lessonId: string;
+  kind: "video" | "pdf";
   fileName: string;
   size: number;
   contentType: string;
-}): Promise<VideoUploadResult> {
+}): Promise<UploadResult> {
   await assertAdmin();
-  if (!isStorageConfigured()) return { ok: false, message: "Spațiul de stocare video nu este conectat." };
+  if (!isStorageConfigured()) return { ok: false, message: "Spațiul de stocare nu este conectat." };
 
-  const ext = VIDEO_TYPES[input.contentType];
-  if (!ext) return { ok: false, message: "Alege un fișier video MP4, WebM sau MOV." };
+  const kind = UPLOAD_KINDS[input.kind];
+  if (!kind) return { ok: false, message: "Tip de fișier necunoscut." };
+  const ext = kind.types[input.contentType];
+  if (!ext) return { ok: false, message: kind.wrongType };
   if (!Number.isSafeInteger(input.size) || input.size <= 0) return { ok: false, message: "Fișierul este gol." };
-  if (input.size > MAX_UPLOAD_BYTES) {
-    return { ok: false, message: "Fișierul depășește 5 GB. Micșorează-l (export la 1080p) și încearcă din nou." };
-  }
+  if (input.size > kind.maxBytes) return { ok: false, message: kind.tooBig };
 
   const lesson = await prisma.lesson.findUnique({
     where: { id: input.lessonId },
@@ -345,12 +372,12 @@ export async function requestVideoUpload(input: {
   if (used + input.size > STORAGE_LIMIT_BYTES) {
     return {
       ok: false,
-      message: "Nu poți adăuga video: spațiul de stocare de 10 GB este plin. Contactează creatorul site-ului.",
+      message: "Nu poți adăuga fișiere: spațiul de stocare de 10 GB este plin. Contactează creatorul site-ului.",
     };
   }
 
   // Nume curat și unic, ca un fișier nou să nu-l suprascrie pe altul cu același nume.
-  const base = slugify(input.fileName.replace(/\.[^.]+$/, "")) || "video";
+  const base = slugify(input.fileName.replace(/\.[^.]+$/, "")) || input.kind;
   let key = `cursuri/${lesson.course.slug}/${base}.${ext}`;
   for (let i = 2; ; i++) {
     const exists = await videoExists(key);

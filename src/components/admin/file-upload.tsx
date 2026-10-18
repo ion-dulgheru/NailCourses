@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { Upload } from 'lucide-react'
-import { requestVideoUpload } from '@/lib/actions/admin.actions'
+import { requestUpload } from '@/lib/actions/admin.actions'
 import { adminButton } from './styles'
 
 export type StorageUsage = { used: number; limit: number }
@@ -19,14 +19,21 @@ const formatSize = (bytes: number) =>
     ? `${Math.round(bytes / 1024 ** 2).toLocaleString('ro-RO')} MB`
     : `${(bytes / 1024 ** 3).toLocaleString('ro-RO', { maximumFractionDigits: 2 })} GB`
 
-// Urcă un videoclip direct din browser în R2. Serverul verifică întâi limita de 10 GB și dă un link
-// semnat; la final, cheia fișierului e pusă în câmpul „Videoclip” prin `onUploaded`.
-export function VideoUpload({
+const KINDS = {
+  video: { accept: 'video/mp4,video/webm,video/quicktime', button: 'Încarcă video de pe calculator', done: 'Videoclipul a fost încărcat.' },
+  pdf: { accept: 'application/pdf', button: 'Încarcă PDF de pe calculator', done: 'PDF-ul a fost încărcat.' },
+}
+
+// Urcă un fișier (video sau PDF) direct din browser în R2. Serverul verifică întâi limita de 10 GB
+// și dă un link semnat; la final, cheia fișierului e pusă în câmpul blocului prin `onUploaded`.
+export function FileUpload({
   lessonId,
+  kind,
   storage,
   onUploaded,
 }: {
   lessonId: string
+  kind: 'video' | 'pdf'
   storage: StorageUsage | null
   onUploaded: (key: string) => void
 }) {
@@ -50,7 +57,7 @@ export function VideoUpload({
     setState({ status: 'uploading', progress: 0 })
     let result
     try {
-      result = await requestVideoUpload({ lessonId, fileName: file.name, size: file.size, contentType: file.type })
+      result = await requestUpload({ lessonId, kind, fileName: file.name, size: file.size, contentType: file.type })
     } catch {
       return setState({ status: 'error', message: 'Nu am putut pregăti încărcarea. Încearcă din nou.' })
     }
@@ -83,7 +90,7 @@ export function VideoUpload({
         <input
           ref={inputRef}
           type="file"
-          accept="video/mp4,video/webm,video/quicktime"
+          accept={KINDS[kind].accept}
           className="sr-only"
           tabIndex={-1}
           onChange={(e) => {
@@ -99,7 +106,7 @@ export function VideoUpload({
           className={adminButton.secondary}
         >
           <Upload className="size-4" strokeWidth={1.5} aria-hidden="true" />
-          {uploading ? `Se încarcă… ${state.progress}%` : 'Încarcă video de pe calculator'}
+          {uploading ? `Se încarcă… ${state.progress}%` : KINDS[kind].button}
         </button>
         <span className="text-[12px] text-stone">
           Spațiu folosit: {formatSize(used)} din {formatSize(storage.limit)}
@@ -114,7 +121,7 @@ export function VideoUpload({
 
       {full ? (
         <p role="alert" className="text-[13px] font-medium text-red-700">
-          Nu poți adăuga video: spațiul de stocare de 10 GB este plin. Contactează creatorul site-ului.
+          Nu poți adăuga fișiere: spațiul de stocare de 10 GB este plin. Contactează creatorul site-ului.
         </p>
       ) : state.status === 'error' ? (
         <p role="alert" className="text-[13px] text-red-700">
@@ -122,7 +129,7 @@ export function VideoUpload({
         </p>
       ) : state.status === 'done' ? (
         <p role="status" className="text-[13px] text-emerald-700">
-          Videoclipul a fost încărcat. Apasă „Salvează” ca să-l adaugi în lecție.
+          {KINDS[kind].done} Apasă „Salvează” ca să-l adaugi în lecție.
         </p>
       ) : null}
     </div>

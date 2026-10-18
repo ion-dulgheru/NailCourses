@@ -1,21 +1,22 @@
 'use client'
 
 import { useActionState, useEffect, useRef, useState, useTransition } from 'react'
-import { ArrowDown, ArrowUp, Heading, Pencil, Text, Trash2, Video } from 'lucide-react'
+import { ArrowDown, ArrowUp, FileText, Heading, Pencil, Text, Trash2, Video } from 'lucide-react'
 import { deleteBlock, moveBlock, saveBlock, type AdminFormState } from '@/lib/actions/admin.actions'
 import { parseVideoSource } from '@/lib/video'
 import { cn } from '@/lib/utils'
 import { AdminCard, AdminField, ConfirmButton, FormMessage, SaveButton } from './ui'
 import { adminButton, adminInput } from './styles'
-import { VideoUpload, type StorageUsage } from './video-upload'
+import { FileUpload, type StorageUsage } from './file-upload'
 
-export type BlockType = 'titlu' | 'text' | 'video'
+export type BlockType = 'titlu' | 'text' | 'video' | 'pdf'
 export type AdminBlock = { id: string; type: BlockType; text: string; videoKey: string | null }
 
 const TYPES: Record<BlockType, { label: string; add: string; icon: typeof Heading }> = {
   titlu: { label: 'Titlu', add: 'Adaugă titlu', icon: Heading },
   text: { label: 'Text', add: 'Adaugă text', icon: Text },
   video: { label: 'Video', add: 'Adaugă video', icon: Video },
+  pdf: { label: 'PDF', add: 'Adaugă PDF', icon: FileText },
 }
 
 const initialState: AdminFormState = { ok: false, message: '' }
@@ -96,8 +97,9 @@ function BlockForm({
 
       {type === 'video' && (
         <>
-          <VideoUpload
+          <FileUpload
             lessonId={lessonId}
+            kind="video"
             storage={storage}
             onUploaded={(key) => {
               if (videoKeyRef.current) videoKeyRef.current.value = key
@@ -133,6 +135,53 @@ function BlockForm({
         </>
       )}
 
+      {type === 'pdf' && (
+        <>
+          <FileUpload
+            lessonId={lessonId}
+            kind="pdf"
+            storage={storage}
+            onUploaded={(key) => {
+              if (videoKeyRef.current) videoKeyRef.current.value = key
+            }}
+          />
+          <AdminField
+            id={`${prefix}-text`}
+            label="Numele materialului"
+            hint="Așa îl vede eleva în lecție (ex: Fișa de lucru, Lista de materiale)."
+            error={err('text')}
+          >
+            <input
+              id={`${prefix}-text`}
+              name="text"
+              required
+              autoFocus
+              maxLength={200}
+              defaultValue={value('text', block?.text ?? '')}
+              className={adminInput}
+              {...invalid('text')}
+            />
+          </AdminField>
+          <AdminField
+            id={`${prefix}-videoKey`}
+            label="Fișier"
+            hint="Se completează singur după încărcare."
+            error={err('videoKey')}
+          >
+            <input
+              ref={videoKeyRef}
+              id={`${prefix}-videoKey`}
+              name="videoKey"
+              required
+              defaultValue={value('videoKey', block?.videoKey ?? '')}
+              placeholder="cursuri/…/fisa-de-lucru.pdf"
+              className={adminInput}
+              {...invalid('videoKey')}
+            />
+          </AdminField>
+        </>
+      )}
+
       <div className="flex flex-wrap items-center gap-3">
         <SaveButton label={block ? 'Salvează' : 'Adaugă'} />
         <button type="button" onClick={onDone} className={adminButton.secondary}>
@@ -152,6 +201,15 @@ function BlockPreview({ block }: { block: AdminBlock }) {
   }
   if (block.type === 'text') {
     return <p className="line-clamp-3 whitespace-pre-line text-[14px] leading-[1.6] text-stone">{block.text}</p>
+  }
+
+  if (block.type === 'pdf') {
+    return (
+      <div className="min-w-0 text-[14px]">
+        <p className="truncate text-ink">{block.text}</p>
+        <p className="mt-0.5 truncate text-[12px] text-stone">PDF din spațiul de stocare · protejat · {block.videoKey}</p>
+      </div>
+    )
   }
 
   const source = parseVideoSource(block.videoKey)
@@ -198,7 +256,7 @@ export function BlocksEditor({
   return (
     <AdminCard
       title="Conținutul lecției"
-      description="Compune lecția din blocuri, în ordinea în care le vede eleva. O lecție poate avea mai multe videoclipuri."
+      description="Compune lecția din blocuri, în ordinea în care le vede eleva. O lecție poate avea mai multe videoclipuri și materiale PDF."
     >
       {blocks.length === 0 && open === null && (
         <p className="mb-5 border border-dashed border-champagne/20 px-5 py-8 text-center text-[14px] text-stone">
@@ -219,7 +277,7 @@ export function BlocksEditor({
                     <span
                       className={cn(
                         'mt-0.5 inline-flex shrink-0 items-center gap-1.5 px-2 py-1 text-[12px] font-medium',
-                        block.type === 'video' ? 'bg-ink text-champagne-light' : 'bg-sand text-stone',
+                        block.type === 'video' || block.type === 'pdf' ? 'bg-ink text-champagne-light' : 'bg-sand text-stone',
                       )}
                     >
                       <Icon className="size-3" strokeWidth={1.75} aria-hidden="true" />
@@ -244,7 +302,7 @@ export function BlocksEditor({
                           <span className="sr-only">Șterge blocul</span>
                         </>
                       }
-                      confirmLabel={block.type === 'video' ? 'Șterge și videoclipul' : 'Șterge'}
+                      confirmLabel={block.type === 'video' ? 'Șterge și videoclipul' : block.type === 'pdf' ? 'Șterge și PDF-ul' : 'Șterge'}
                       className={adminButton.small + ' text-red-700 hover:border-red-600'}
                     />
                   </div>
@@ -256,7 +314,7 @@ export function BlocksEditor({
       </ol>
 
       <div className={blocks.length ? 'mt-4' : ''}>
-        {open === 'titlu' || open === 'text' || open === 'video' ? (
+        {open === 'titlu' || open === 'text' || open === 'video' || open === 'pdf' ? (
           <BlockForm lessonId={lessonId} type={open} storage={storage} onDone={close} />
         ) : (
           <div className="flex flex-wrap gap-2">

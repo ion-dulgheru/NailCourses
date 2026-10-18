@@ -94,16 +94,17 @@ enum LessonBlockType {
   titlu
   text
   video
+  pdf
 }
 
-// Conținutul unei lecții, compus de admin din blocuri ordonate (titlu, text, video).
+// Conținutul unei lecții, compus de admin din blocuri ordonate (titlu, text, video, pdf).
 model LessonBlock {
   id        String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   lessonId  String          @db.Uuid
   position  Int
   type      LessonBlockType
-  text      String          @default("") // titlul, paragraful sau legenda video-ului
-  videoKey  String?         // link YouTube sau cheia fișierului din R2 (doar pentru `video`)
+  text      String          @default("") // titlul, paragraful, legenda video-ului sau numele PDF-ului
+  videoKey  String?         // `video`: link YouTube sau cheia din R2; `pdf`: cheia fișierului din R2
   createdAt DateTime        @default(now())
   updatedAt DateTime        @updatedAt
 

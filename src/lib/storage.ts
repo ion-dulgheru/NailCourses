@@ -88,6 +88,23 @@ export async function getSignedUploadUrl(key: string, contentType: string, size:
   );
 }
 
+// Link temporar pentru un PDF, deschis în browser (nu descărcat direct) cu numele dat de admin.
+export async function getSignedPdfUrl(key: string, name: string): Promise<string | null> {
+  if (!isStorageConfigured()) return null;
+  const fileName = `${name.trim() || "material"}.pdf`;
+  const ascii = fileName.normalize("NFD").replace(/[^\x20-\x7e]/g, "").replace(/["\\]/g, "");
+  return getSignedUrl(
+    getClient(),
+    new GetObjectCommand({
+      Bucket: process.env.R2_BUCKET,
+      Key: key,
+      ResponseContentType: "application/pdf",
+      ResponseContentDisposition: `inline; filename="${ascii}"; filename*=UTF-8''${encodeURIComponent(fileName)}`,
+    }),
+    { expiresIn: SIGNED_URL_TTL_SECONDS },
+  );
+}
+
 // `null` cât timp R2 nu e configurat: playerul afișează „Videoclipul va fi disponibil în curând”.
 // Semnarea se face local (fără cerere la R2), deci nu verifică existența fișierului.
 export async function getSignedVideoUrl(key: string): Promise<string | null> {

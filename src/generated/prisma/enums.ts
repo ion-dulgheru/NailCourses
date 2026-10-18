@@ -29,7 +29,8 @@ export type CourseStatus = (typeof CourseStatus)[keyof typeof CourseStatus]
 export const LessonBlockType = {
   titlu: 'titlu',
   text: 'text',
-  video: 'video'
+  video: 'video',
+  pdf: 'pdf'
 } as const
 
 export type LessonBlockType = (typeof LessonBlockType)[keyof typeof LessonBlockType]
