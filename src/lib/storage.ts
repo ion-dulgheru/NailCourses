@@ -1,5 +1,6 @@
 import "server-only";
 import {
+  DeleteObjectCommand,
   GetObjectCommand,
   HeadObjectCommand,
   ListObjectsV2Command,
@@ -55,6 +56,12 @@ export async function videoExists(key: string): Promise<boolean | null> {
     const status = (error as { $metadata?: { httpStatusCode?: number } }).$metadata?.httpStatusCode;
     return error instanceof NotFound || status === 404 ? false : null;
   }
+}
+
+// Șterge definitiv un fișier din bucket. Un fișier care nu există nu e o eroare.
+export async function deleteVideoFile(key: string) {
+  if (!isStorageConfigured()) return;
+  await getClient().send(new DeleteObjectCommand({ Bucket: process.env.R2_BUCKET, Key: key }));
 }
 
 // Totalul ocupat în bucket, în octeți (R2 nu are un apel direct, așa că adunăm din listare).

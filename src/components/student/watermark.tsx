@@ -11,7 +11,8 @@ const SPOTS = [
   { top: '60%', left: '8%' },
   { top: '64%', left: '52%' },
 ]
-const MOVE_EVERY_MS = 15_000
+// Rar, ca să nu distragă; destul cât să nu poată fi tăiat dintr-un singur loc al înregistrării.
+const MOVE_EVERY_MS = 45_000
 
 // Emailul elevului peste video, discret și mobil: face partajarea înregistrărilor riscantă.
 // Nu poate bloca înregistrarea ecranului; doar o face identificabilă.
@@ -29,7 +30,7 @@ export function Watermark({ text }: { text: string }) {
     <span
       aria-hidden="true"
       style={SPOTS[spot]}
-      className="pointer-events-none absolute z-10 select-none font-mono text-[11px] tracking-wide whitespace-nowrap text-white/45 [text-shadow:0_0_3px_rgba(0,0,0,0.85)] transition-[top,left] duration-[2000ms] ease-in-out sm:text-[13px]"
+      className="pointer-events-none absolute z-10 select-none font-mono text-[10px] tracking-wide whitespace-nowrap text-white/25 [text-shadow:0_0_2px_rgba(0,0,0,0.6)] transition-[top,left] duration-[3000ms] ease-in-out sm:text-[12px]"
     >
       {text}
     </span>

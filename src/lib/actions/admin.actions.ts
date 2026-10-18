@@ -9,6 +9,7 @@ import { Prisma } from "@/generated/prisma/client";
 import { SETTING_FIELDS } from "@/lib/settings";
 import { parseVideoSource } from "@/lib/video";
 import {
+  deleteVideoFile,
   getSignedUploadUrl,
   getStorageUsage,
   isStorageConfigured,
@@ -123,6 +124,26 @@ export async function saveCourse(prev: AdminFormState, formData: FormData): Prom
   return { ok: true, message: "Modificările au fost salvate." };
 }
 
+// Șterge din R2 fișierele video pe care nu le mai folosește niciun bloc (după o ștergere sau o
+// înlocuire în baza de date). Un fișier folosit și în altă lecție rămâne. O eroare la R2 nu
+// anulează ștergerea din baza de date: fișierul rămas se poate șterge din dashboard-ul Cloudflare.
+async function removeUnusedVideos(videoKeys: (string | null)[]) {
+  for (const videoKey of new Set(videoKeys)) {
+    const source = parseVideoSource(videoKey);
+    if (source?.kind !== "fisier") continue;
+    const stillUsed = await prisma.lessonBlock.count({ where: { videoKey } });
+    if (stillUsed) continue;
+    await deleteVideoFile(source.key).catch((error) =>
+      console.error(`[r2] ștergerea fișierului ${source.key} a eșuat:`, error),
+    );
+  }
+}
+
+async function videoKeysOf(where: { lesson: { courseId: string } } | { lessonId: string }) {
+  const blocks = await prisma.lessonBlock.findMany({ where: { ...where, type: "video" }, select: { videoKey: true } });
+  return blocks.map((b) => b.videoKey);
+}
+
 export async function deleteCourse(courseId: string): Promise<AdminFormState> {
   await assertAdmin();
 
@@ -137,7 +158,9 @@ export async function deleteCourse(courseId: string): Promise<AdminFormState> {
     };
   }
 
+  const videoKeys = await videoKeysOf({ lesson: { courseId } });
   await prisma.course.delete({ where: { id: courseId } });
+  await removeUnusedVideos(videoKeys);
   redirect("/admin/cursuri");
 }
 
@@ -196,7 +219,9 @@ export async function saveLesson(prev: AdminFormState, formData: FormData): Prom
 
 export async function deleteLesson(lessonId: string) {
   await assertAdmin();
+  const videoKeys = await videoKeysOf({ lessonId });
   await prisma.lesson.delete({ where: { id: lessonId } });
+  await removeUnusedVideos(videoKeys);
   refresh();
 }
 
@@ -248,13 +273,14 @@ export async function saveBlock(prev: AdminFormState, formData: FormData): Promi
   const parsed = blockSchema.safeParse(values);
   if (!parsed.success) return fieldErrors(parsed.error, values);
 
+  const current = blockId
+    ? await prisma.lessonBlock.findUnique({ where: { id: blockId }, select: { videoKey: true } })
+    : null;
+
   // O greșeală de scriere în numele fișierului s-ar vedea abia la elevă; o prindem la salvare.
   // Doar când numele se schimbă, ca adminul să poată edita legenda înainte să urce fișierul.
   if (parsed.data.type === "video") {
     const source = parseVideoSource(parsed.data.videoKey);
-    const current = blockId
-      ? await prisma.lessonBlock.findUnique({ where: { id: blockId }, select: { videoKey: true } })
-      : null;
     const changed = current?.videoKey?.trim() !== parsed.data.videoKey;
     if (source?.kind === "fisier" && changed && (await videoExists(source.key)) === false) {
       return {
@@ -274,6 +300,8 @@ export async function saveBlock(prev: AdminFormState, formData: FormData): Promi
 
   if (blockId) {
     await prisma.lessonBlock.update({ where: { id: blockId }, data });
+    // Videoclipul înlocuit nu mai e folosit: fișierul vechi se șterge din R2.
+    if (current?.videoKey && current.videoKey !== data.videoKey) await removeUnusedVideos([current.videoKey]);
   } else {
     const last = await prisma.lessonBlock.aggregate({ where: { lessonId }, _max: { position: true } });
     await prisma.lessonBlock.create({ data: { ...data, lessonId, position: (last._max.position ?? -1) + 1 } });
@@ -336,7 +364,8 @@ export async function requestVideoUpload(input: {
 
 export async function deleteBlock(blockId: string) {
   await assertAdmin();
-  await prisma.lessonBlock.delete({ where: { id: blockId } });
+  const block = await prisma.lessonBlock.delete({ where: { id: blockId }, select: { videoKey: true } });
+  await removeUnusedVideos([block.videoKey]);
   refresh();
 }
 

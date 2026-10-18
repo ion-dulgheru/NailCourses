@@ -17,7 +17,7 @@ export function CourseDangerZone({ courseId, hasStudents }: { courseId: string; 
 
   return (
     <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-      <p className="text-[14px] text-stone">Șterge definitiv cursul și toate lecțiile lui. Nu se poate anula.</p>
+      <p className="text-[14px] text-stone">Șterge definitiv cursul, toate lecțiile lui și videoclipurile lor din spațiul de stocare. Nu se poate anula.</p>
       <div className="flex flex-col items-start gap-2">
         <ConfirmButton
           label="Șterge cursul"

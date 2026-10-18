@@ -244,7 +244,7 @@ export function BlocksEditor({
                           <span className="sr-only">Șterge blocul</span>
                         </>
                       }
-                      confirmLabel="Șterge"
+                      confirmLabel={block.type === 'video' ? 'Șterge și videoclipul' : 'Șterge'}
                       className={adminButton.small + ' text-red-700 hover:border-red-600'}
                     />
                   </div>

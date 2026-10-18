@@ -207,7 +207,7 @@ export function LessonsManager({ courseId, lessons }: { courseId: string; lesson
                         <span className="sr-only">Șterge lecția {lesson.title}</span>
                       </>
                     }
-                    confirmLabel="Șterge"
+                    confirmLabel="Șterge lecția și videoclipurile"
                     className={adminButton.small + ' text-red-700 hover:border-red-600'}
                   />
                 </div>
