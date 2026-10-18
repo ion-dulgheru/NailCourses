@@ -72,13 +72,13 @@ export default async function StudentsPage({ searchParams }: { searchParams: Pro
       </p>
 
       {users.length === 0 ? (
-        <div className="border border-dashed border-line bg-ivory px-6 py-12 text-center text-[14px] text-stone">
+        <div className="border border-dashed border-champagne/20 bg-ivory px-6 py-12 text-center text-[14px] text-stone">
           {q ? 'Niciun cont nu se potrivește căutării.' : 'Încă nu s-a înregistrat nimeni.'}
         </div>
       ) : (
-        <div className="overflow-x-auto border border-line bg-ivory">
+        <div className="overflow-x-auto border border-champagne/20 bg-ivory">
           <table className="w-full min-w-[620px] text-left text-[14px]">
-            <thead className="border-b border-line bg-sand/60 text-[11px] uppercase tracking-[0.12em] text-stone">
+            <thead className="border-b border-champagne/20 bg-sand/60 text-[12px] text-stone">
               <tr>
                 <th scope="col" className="px-5 py-3 font-medium">Nume</th>
                 <th scope="col" className="px-5 py-3 font-medium">Email</th>
@@ -87,7 +87,7 @@ export default async function StudentsPage({ searchParams }: { searchParams: Pro
                 <th scope="col" className="px-5 py-3"><span className="sr-only">Acțiuni</span></th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-line/70">
+            <tbody className="divide-y divide-champagne/20/70">
               {users.map((u) => (
                 <tr key={u.id} className="transition-colors hover:bg-sand/40">
                   <td className="px-5 py-3.5">
@@ -95,7 +95,7 @@ export default async function StudentsPage({ searchParams }: { searchParams: Pro
                       {[u.surname, u.name].filter(Boolean).join(' ')}
                     </Link>
                     {u.role === 'admin' && (
-                      <span className="ml-2 bg-ink px-1.5 py-0.5 text-[10px] uppercase tracking-[0.1em] text-champagne-light">
+                      <span className="ml-2 bg-ink px-1.5 py-0.5 text-[12px] text-champagne-light">
                         Admin
                       </span>
                     )}

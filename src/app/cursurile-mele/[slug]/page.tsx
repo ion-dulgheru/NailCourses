@@ -50,11 +50,12 @@ export default async function MyCoursePage({ params }: Props) {
               <span className="text-ivory/80">{course.title}</span>
             </nav>
 
-            <h1 className="mt-5 pb-1 font-display text-[40px] leading-[1.05] font-normal text-gold-metal sm:text-[52px]">
+            <h1 className="mt-5 font-display text-[40px] leading-[1] font-light tracking-[-0.015em] sm:text-[52px]">
               {course.title}
             </h1>
-            <p className="mt-3 text-[14px] text-ivory/60">
-              {lessonsLabel(progress.total)} · {formatDuration(totalSeconds)}
+            <p className="mt-4 flex gap-6 font-mono text-[13px] text-ivory/60">
+              <span>{lessonsLabel(progress.total)}</span>
+              <span>{formatDuration(totalSeconds)}</span>
             </p>
 
             <div className="mt-8 flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
@@ -77,31 +78,31 @@ export default async function MyCoursePage({ params }: Props) {
         <section className="py-12 lg:py-16">
           <div className={`${container} grid gap-10 lg:grid-cols-[minmax(0,1fr)_320px] lg:gap-14`}>
             <div>
-              <h2 className="font-display text-[28px] uppercase tracking-[0.03em] text-ink">Lecții</h2>
+              <h2 className="font-display text-[34px] leading-tight font-light text-ink">Lecții</h2>
               {course.lessons.length === 0 ? (
                 <p className="mt-6 text-[15px] text-stone">Lecțiile vor fi disponibile în curând.</p>
               ) : (
-                <ol className="mt-6 border-t border-line">
+                <ol className="mt-6 border-t border-champagne/20">
                   {course.lessons.map((lesson, i) => {
                     const done = completed.has(lesson.id)
                     return (
                       <li key={lesson.id}>
                         <Link
                           href={`/cursurile-mele/${course.slug}/${lesson.slug}`}
-                          className="group flex items-center gap-4 border-b border-line py-4 transition-colors hover:bg-sand/60 sm:gap-5 sm:px-3"
+                          className="group flex items-center gap-4 border-b border-champagne/20 py-4 transition-colors hover:bg-sand sm:gap-5 sm:px-3"
                         >
                           {done ? (
                             <CheckCircle2 className="size-5 shrink-0 text-bronze" strokeWidth={1.5} aria-label="Terminată" />
                           ) : (
-                            <Circle className="size-5 shrink-0 text-line" strokeWidth={1.5} aria-label="Neterminată" />
+                            <Circle className="size-5 shrink-0 text-champagne/40" strokeWidth={1.5} aria-label="Neterminată" />
                           )}
-                          <span className="w-7 shrink-0 font-display text-[20px] text-bronze">
+                          <span className="w-7 shrink-0 font-mono text-[13px] text-bronze">
                             {String(i + 1).padStart(2, '0')}
                           </span>
                           <span className={`flex-1 text-[15px] leading-snug ${done ? 'text-stone' : 'text-ink'} group-hover:text-bronze`}>
                             {lesson.title}
                           </span>
-                          <span className="shrink-0 text-[13px] text-stone">{formatDuration(lesson.durationSeconds)}</span>
+                          <span className="shrink-0 font-mono text-[12px] text-stone">{formatDuration(lesson.durationSeconds)}</span>
                         </Link>
                       </li>
                     )
@@ -110,9 +111,9 @@ export default async function MyCoursePage({ params }: Props) {
               )}
             </div>
 
-            <aside className="h-fit border border-line p-6 lg:sticky lg:top-24">
+            <aside className="h-fit border border-champagne/20 p-6 lg:sticky lg:top-24">
               <Award className="size-8 text-bronze" strokeWidth={1} aria-hidden="true" />
-              <h2 className="mt-4 font-display text-[24px] leading-tight text-ink">Certificat de absolvire</h2>
+              <h2 className="mt-4 font-display text-[26px] leading-tight font-light text-ink">Certificat de absolvire</h2>
               {certificate ? (
                 <>
                   <p className="mt-3 text-[14px] leading-[1.6] text-stone">

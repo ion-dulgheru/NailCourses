@@ -52,12 +52,12 @@ export default async function LessonPage({ params }: Props) {
   return (
     <div className="min-h-svh bg-ink text-ivory">
       {/* Bară compactă: mod de învățare, fără meniul complet al site-ului */}
-      <header className="sticky top-0 z-30 border-b border-ivory/10 bg-ink/95 backdrop-blur">
+      <header className="sticky top-0 z-30 border-b border-champagne/15 bg-ink/95 backdrop-blur">
         <div className="mx-auto flex h-14 max-w-[1440px] items-center gap-4 px-5 sm:px-8 lg:h-16 lg:px-10">
           <div className="hidden sm:block">
             <Wordmark />
           </div>
-          <span aria-hidden="true" className="hidden h-5 w-px bg-ivory/15 sm:block" />
+          <span aria-hidden="true" className="hidden h-5 w-px bg-champagne/20 sm:block" />
           <Link
             href={`/cursurile-mele/${course.slug}`}
             className="flex min-w-0 items-center gap-2 text-[13px] text-ivory/70 transition-colors hover:text-champagne-light"
@@ -65,7 +65,7 @@ export default async function LessonPage({ params }: Props) {
             <ArrowLeft className="size-4 shrink-0" strokeWidth={1.5} aria-hidden="true" />
             <span className="truncate">{course.title}</span>
           </Link>
-          <span className="ml-auto shrink-0 text-[12px] text-ivory/50">
+          <span className="ml-auto shrink-0 font-mono text-[12px] text-ivory/50">
             {progress.done}/{progress.total} terminate
           </span>
         </div>
@@ -76,10 +76,13 @@ export default async function LessonPage({ params }: Props) {
           {lead && <LessonBlock block={lead} watermark={user.email} lessonTitle={lesson.title} />}
 
           <div className="px-5 pt-8 sm:px-0">
-            <p className="text-[11px] font-medium uppercase tracking-[0.28em] text-champagne-light">
-              Lecția {index + 1} din {course.lessons.length} · {formatDuration(lesson.durationSeconds)}
+            <p className="flex gap-6 font-mono text-[12px] text-champagne-light/80">
+              <span>
+                Lecția {String(index + 1).padStart(2, '0')}/{String(course.lessons.length).padStart(2, '0')}
+              </span>
+              <span>{formatDuration(lesson.durationSeconds)}</span>
             </p>
-            <h1 className="mt-3 font-display text-[32px] leading-[1.1] text-ivory sm:text-[42px]">{lesson.title}</h1>
+            <h1 className="mt-3 font-display text-[36px] leading-[1.05] font-light text-ivory sm:text-[48px]">{lesson.title}</h1>
             {lesson.description && (
               <p className="mt-4 max-w-[46rem] text-[15px] leading-[1.7] text-ivory/70">{lesson.description}</p>
             )}
@@ -93,12 +96,12 @@ export default async function LessonPage({ params }: Props) {
             )}
 
             {blocks.length === 0 && (
-              <p className="mt-8 border border-dashed border-ivory/15 px-5 py-6 text-[14px] text-ivory/55">
+              <p className="mt-8 border border-champagne/15 px-5 py-6 text-[14px] text-ivory/55">
                 Conținutul acestei lecții va fi disponibil în curând.
               </p>
             )}
 
-            <div className="mt-8 flex flex-col gap-4 border-t border-ivory/10 pt-8 sm:flex-row sm:items-center sm:justify-between">
+            <div className="mt-8 flex flex-col gap-4 border-t border-champagne/15 pt-8 sm:flex-row sm:items-center sm:justify-between">
               <CompleteButton key={lesson.id} lessonId={lesson.id} completed={completed.has(lesson.id)} />
 
               <nav aria-label="Navigare între lecții" className="flex gap-3">
@@ -131,7 +134,7 @@ export default async function LessonPage({ params }: Props) {
             </div>
 
             {progress.finished && (
-              <p className="mt-8 border-l-2 border-champagne bg-champagne/10 px-4 py-3 text-[14px] text-ivory/85">
+              <p className="mt-8 border border-champagne/20 px-4 py-3 text-[14px] text-ivory/85">
                 Felicitări, ai terminat toate lecțiile cursului!{' '}
                 <Link href={`/cursurile-mele/${course.slug}`} className="text-champagne-light underline underline-offset-4">
                   Vezi certificatul
@@ -141,8 +144,8 @@ export default async function LessonPage({ params }: Props) {
           </div>
         </main>
 
-        <aside className="border-t border-ivory/10 lg:sticky lg:top-16 lg:h-[calc(100svh-4rem)] lg:overflow-y-auto lg:border-t-0 lg:border-l">
-          <div className="border-b border-ivory/10 px-5 py-5 sm:px-8 lg:px-6">
+        <aside className="border-t border-champagne/15 lg:sticky lg:top-16 lg:h-[calc(100svh-4rem)] lg:overflow-y-auto lg:border-t-0 lg:border-l">
+          <div className="border-b border-champagne/15 px-5 py-5 sm:px-8 lg:px-6">
             <h2 className="font-display text-[22px] text-ivory">Lecțiile cursului</h2>
             <ProgressBar done={progress.done} total={progress.total} label="Progresul cursului" tone="dark" className="mt-3" />
           </div>
@@ -156,7 +159,7 @@ export default async function LessonPage({ params }: Props) {
                     href={lessonHref(l.slug)}
                     aria-current={current ? 'page' : undefined}
                     className={cn(
-                      'flex items-start gap-3 border-b border-ivory/5 px-5 py-3.5 transition-colors sm:px-8 lg:px-6',
+                      'flex items-start gap-3 border-b border-champagne/15 px-5 py-3.5 transition-colors sm:px-8 lg:px-6',
                       current ? 'bg-ivory/[0.07]' : 'hover:bg-ivory/[0.04]',
                     )}
                   >
@@ -167,9 +170,12 @@ export default async function LessonPage({ params }: Props) {
                     )}
                     <span className="min-w-0 flex-1">
                       <span className={cn('block text-[14px] leading-snug', current ? 'text-ivory' : 'text-ivory/70')}>
-                        {i + 1}. {l.title}
+                        {l.title}
                       </span>
-                      <span className="mt-0.5 block text-[12px] text-ivory/40">{formatDuration(l.durationSeconds)}</span>
+                      <span className="mt-1 flex gap-3 font-mono text-[11px] text-ivory/40">
+                        <span>{String(i + 1).padStart(2, '0')}</span>
+                        <span>{formatDuration(l.durationSeconds)}</span>
+                      </span>
                     </span>
                     {current && <span aria-hidden="true" className="mt-1.5 size-1.5 shrink-0 rounded-full bg-champagne" />}
                   </Link>

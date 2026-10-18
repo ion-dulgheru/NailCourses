@@ -31,7 +31,7 @@ export default async function AdminCoursesPage() {
       />
 
       {courses.length === 0 ? (
-        <div className="border border-dashed border-line bg-ivory px-6 py-14 text-center">
+        <div className="border border-dashed border-champagne/20 bg-ivory px-6 py-14 text-center">
           <p className="font-display text-[24px] text-ink">Încă nu există cursuri.</p>
           <Link href="/admin/cursuri/nou" className={`${adminButton.primary} mt-5`}>
             Creează primul curs
@@ -43,7 +43,7 @@ export default async function AdminCoursesPage() {
             <li key={course.id}>
               <Link
                 href={`/admin/cursuri/${course.id}`}
-                className="group flex items-center gap-4 border border-line bg-ivory p-3 pr-5 transition-colors hover:border-champagne sm:gap-5"
+                className="group flex items-center gap-4 border border-champagne/20 bg-ivory p-3 pr-5 transition-colors hover:border-champagne sm:gap-5"
               >
                 <div className="relative size-16 shrink-0 overflow-hidden bg-sand sm:size-20">
                   <Image src={course.coverImage} alt="" fill sizes="80px" className="object-cover" />
@@ -60,7 +60,7 @@ export default async function AdminCoursesPage() {
                     {course._count.enrollments === 1 ? 'elev' : 'elevi'}
                   </p>
                 </div>
-                <p className="hidden shrink-0 font-display text-[22px] text-ink sm:block">
+                <p className="hidden shrink-0 font-mono text-[15px] text-ink sm:block">
                   {formatMdl(course.priceMdl)}
                 </p>
               </Link>

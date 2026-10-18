@@ -27,36 +27,47 @@ const faqs = [
 
 export function Faq() {
   return (
-    <section id="intrebari" className="scroll-mt-4 bg-ivory pb-16 lg:pb-24">
-      <div className={`${container} border-t border-line pt-14 lg:pt-20`}>
-        <SectionTitle>Întrebări frecvente</SectionTitle>
+    <section id="intrebari" className="scroll-mt-4 bg-ivory pb-16 lg:pb-28">
+      <div className={container}>
+        <div className="grid gap-10 border-t border-champagne/20 pt-16 lg:grid-cols-12 lg:gap-8 lg:pt-28">
+          <div className="lg:col-span-4">
+            <SectionTitle>
+              Întrebări <em>frecvente</em>
+            </SectionTitle>
+            <p className="mt-5 text-[15px] leading-[1.65] text-stone">
+              <Link
+                href="/intrebari-frecvente"
+                className="text-ink underline decoration-champagne/50 underline-offset-[6px] hover:decoration-bronze"
+              >
+                Vezi toate întrebările
+              </Link>{' '}
+              sau{' '}
+              <Link
+                href="/contact"
+                className="text-ink underline decoration-champagne/50 underline-offset-[6px] hover:decoration-bronze"
+              >
+                scrie-ne
+              </Link>
+              .
+            </p>
+          </div>
 
-        <div className="mx-auto mt-10 max-w-3xl border-t border-line lg:mt-14">
-          {faqs.map((f) => (
-            <details key={f.q} className="group border-b border-line">
-              <summary className="flex cursor-pointer list-none items-center justify-between gap-6 py-5 font-display text-[21px] leading-snug text-ink sm:text-[23px] [&::-webkit-details-marker]:hidden">
-                {f.q}
-                <Plus
-                  className="size-5 shrink-0 text-bronze transition-transform duration-300 group-open:rotate-45"
-                  strokeWidth={1.3}
-                  aria-hidden="true"
-                />
-              </summary>
-              <p className="pb-6 text-[15px] leading-[1.75] text-stone">{f.a}</p>
-            </details>
-          ))}
+          <div className="lg:col-span-8">
+            {faqs.map((f) => (
+              <details key={f.q} className="group border-b border-champagne/20">
+                <summary className="flex cursor-pointer list-none items-center justify-between gap-6 py-6 font-display text-[22px] leading-snug text-ink group-first:pt-0 sm:text-[25px] [&::-webkit-details-marker]:hidden">
+                  {f.q}
+                  <Plus
+                    className="size-5 shrink-0 text-bronze transition-transform duration-300 group-open:rotate-45"
+                    strokeWidth={1.3}
+                    aria-hidden="true"
+                  />
+                </summary>
+                <p className="max-w-[40rem] pb-7 text-[15px] leading-[1.75] text-stone">{f.a}</p>
+              </details>
+            ))}
+          </div>
         </div>
-
-        <p className="mt-8 text-center text-sm text-stone">
-          <Link href="/intrebari-frecvente" className="text-ink underline underline-offset-4">
-            Vezi toate întrebările
-          </Link>{' '}
-          sau{' '}
-          <Link href="/contact" className="text-ink underline underline-offset-4">
-            scrie-ne
-          </Link>
-          .
-        </p>
       </div>
     </section>
   )

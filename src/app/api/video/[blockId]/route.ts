@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/current-user";
 import { prisma } from "@/lib/db";
-import { getSignedVideoUrl, SIGNED_URL_TTL_SECONDS } from "@/lib/storage";
+import { getSignedVideoUrl, SIGNED_URL_TTL_SECONDS, videoExists } from "@/lib/storage";
 import { parseVideoSource } from "@/lib/video";
 
 // Linkul temporar al unui videoclip. Se emite doar dacă userul are rând în `enrollments` pentru
@@ -33,6 +33,9 @@ export async function GET(_req: Request, { params }: { params: Promise<{ blockId
 
   const source = parseVideoSource(block.videoKey);
   if (source?.kind !== "fisier") return NextResponse.json({ url: null }, { headers: noStore });
+
+  // Fișier încă neurcat → `url: null`, iar playerul afișează „disponibil în curând”, nu o eroare.
+  if ((await videoExists(source.key)) === false) return NextResponse.json({ url: null }, { headers: noStore });
 
   const url = await getSignedVideoUrl(source.key);
   return NextResponse.json({ url, expiresIn: url ? SIGNED_URL_TTL_SECONDS : null }, { headers: noStore });

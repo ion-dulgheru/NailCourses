@@ -1,12 +1,13 @@
 'use client'
 
-import { useActionState, useEffect, useState, useTransition } from 'react'
+import { useActionState, useEffect, useRef, useState, useTransition } from 'react'
 import { ArrowDown, ArrowUp, Heading, Pencil, Text, Trash2, Video } from 'lucide-react'
 import { deleteBlock, moveBlock, saveBlock, type AdminFormState } from '@/lib/actions/admin.actions'
 import { parseVideoSource } from '@/lib/video'
 import { cn } from '@/lib/utils'
 import { AdminCard, AdminField, ConfirmButton, FormMessage, SaveButton } from './ui'
 import { adminButton, adminInput } from './styles'
+import { VideoUpload, type StorageUsage } from './video-upload'
 
 export type BlockType = 'titlu' | 'text' | 'video'
 export type AdminBlock = { id: string; type: BlockType; text: string; videoKey: string | null }
@@ -23,14 +24,17 @@ function BlockForm({
   lessonId,
   type,
   block,
+  storage,
   onDone,
 }: {
   lessonId: string
   type: BlockType
   block?: AdminBlock
+  storage: StorageUsage | null
   onDone: () => void
 }) {
   const [state, action] = useActionState(saveBlock, initialState)
+  const videoKeyRef = useRef<HTMLInputElement>(null)
 
   // După salvare, formularul se închide (blocul nou apare în listă).
   useEffect(() => {
@@ -49,7 +53,7 @@ function BlockForm({
       <input type="hidden" name="type" value={type} />
       {block && <input type="hidden" name="blockId" value={block.id} />}
 
-      <p className="flex items-center gap-2 text-[11px] font-medium uppercase tracking-[0.2em] text-bronze">
+      <p className="flex items-center gap-2 text-[12px] font-medium text-bronze">
         <Icon className="size-4" strokeWidth={1.5} aria-hidden="true" />
         {block ? `Editează ${TYPES[type].label.toLowerCase()}` : TYPES[type].add}
       </p>
@@ -92,13 +96,21 @@ function BlockForm({
 
       {type === 'video' && (
         <>
+          <VideoUpload
+            lessonId={lessonId}
+            storage={storage}
+            onUploaded={(key) => {
+              if (videoKeyRef.current) videoKeyRef.current.value = key
+            }}
+          />
           <AdminField
             id={`${prefix}-videoKey`}
             label="Videoclip"
-            hint="Numele fișierului din spațiul de stocare (ex: bazele/lectia-04.mp4). Pentru lecțiile gratuite poți pune un link YouTube; atenție: un video YouTube poate fi văzut de oricine are linkul."
+            hint="Se completează singur după încărcare. Poți scrie și numele unui fișier deja urcat în spațiul de stocare. Pentru lecțiile gratuite poți pune un link YouTube; atenție: un video YouTube poate fi văzut de oricine are linkul."
             error={err('videoKey')}
           >
             <input
+              ref={videoKeyRef}
               id={`${prefix}-videoKey`}
               name="videoKey"
               required
@@ -170,7 +182,15 @@ function MoveButtons({ blockId, first, last }: { blockId: string; first: boolean
   )
 }
 
-export function BlocksEditor({ lessonId, blocks }: { lessonId: string; blocks: AdminBlock[] }) {
+export function BlocksEditor({
+  lessonId,
+  blocks,
+  storage,
+}: {
+  lessonId: string
+  blocks: AdminBlock[]
+  storage: StorageUsage | null
+}) {
   // `null` = nimic deschis; id-ul unui bloc = editare; tip = bloc nou de acel tip.
   const [open, setOpen] = useState<string | null>(null)
   const close = () => setOpen(null)
@@ -181,7 +201,7 @@ export function BlocksEditor({ lessonId, blocks }: { lessonId: string; blocks: A
       description="Compune lecția din blocuri, în ordinea în care le vede eleva. O lecție poate avea mai multe videoclipuri."
     >
       {blocks.length === 0 && open === null && (
-        <p className="mb-5 border border-dashed border-line px-5 py-8 text-center text-[14px] text-stone">
+        <p className="mb-5 border border-dashed border-champagne/20 px-5 py-8 text-center text-[14px] text-stone">
           Lecția nu are încă conținut. Începe cu un video sau un titlu.
         </p>
       )}
@@ -192,13 +212,13 @@ export function BlocksEditor({ lessonId, blocks }: { lessonId: string; blocks: A
           return (
             <li key={block.id}>
               {open === block.id ? (
-                <BlockForm lessonId={lessonId} type={block.type} block={block} onDone={close} />
+                <BlockForm lessonId={lessonId} type={block.type} block={block} storage={storage} onDone={close} />
               ) : (
-                <div className="flex flex-col gap-3 border border-line px-4 py-3 sm:flex-row sm:items-center">
+                <div className="flex flex-col gap-3 border border-champagne/20 px-4 py-3 sm:flex-row sm:items-center">
                   <div className="flex min-w-0 flex-1 items-start gap-3">
                     <span
                       className={cn(
-                        'mt-0.5 inline-flex shrink-0 items-center gap-1.5 px-2 py-1 text-[10px] font-medium uppercase tracking-[0.12em]',
+                        'mt-0.5 inline-flex shrink-0 items-center gap-1.5 px-2 py-1 text-[12px] font-medium',
                         block.type === 'video' ? 'bg-ink text-champagne-light' : 'bg-sand text-stone',
                       )}
                     >
@@ -237,7 +257,7 @@ export function BlocksEditor({ lessonId, blocks }: { lessonId: string; blocks: A
 
       <div className={blocks.length ? 'mt-4' : ''}>
         {open === 'titlu' || open === 'text' || open === 'video' ? (
-          <BlockForm lessonId={lessonId} type={open} onDone={close} />
+          <BlockForm lessonId={lessonId} type={open} storage={storage} onDone={close} />
         ) : (
           <div className="flex flex-wrap gap-2">
             {(Object.keys(TYPES) as BlockType[]).map((type) => {

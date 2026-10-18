@@ -1,55 +1,103 @@
 import Image from 'next/image'
 import Link from 'next/link'
-import { ButtonLink } from './primitives'
+import { Play } from 'lucide-react'
+import { Badge, ButtonLink } from './primitives'
+import {
+  formatDuration,
+  formatMdl,
+  getPublishedCourse,
+  getPublishedCourses,
+  lessonsLabel,
+} from '@/lib/courses'
 
-export function Hero() {
+// Câte lecții din programă apar în previzualizarea din dreapta
+const PREVIEW_LESSONS = 4
+
+export async function Hero() {
+  const [first] = await getPublishedCourses({ take: 1 })
+  const course = first ? await getPublishedCourse(first.slug) : null
+  const freeLesson = course?.lessons.find((l) => l.isFreePreview)
+
   return (
-    <section className="relative overflow-hidden bg-ink text-ivory">
-      {/* Imagine: sus pe mobil (titlul se suprapune pe partea de jos), jumătatea dreaptă pe desktop */}
-      <div className="relative h-[68svh] min-h-[440px] md:h-[620px] lg:absolute lg:inset-y-0 lg:right-0 lg:h-auto lg:w-[58%]">
-        <Image
-          src="/images/hero-hands-face.jpg"
-          alt="Femeie cu manichiură nude, cu mâinile lângă față"
-          fill
-          preload
-          sizes="(min-width: 1024px) 58vw, 100vw"
-          className="object-cover object-[50%_35%]"
-        />
-        <div className="absolute inset-0 bg-gradient-to-b from-ink/60 via-ink/0 via-25% to-ink lg:bg-gradient-to-r lg:from-ink lg:via-ink/0 lg:via-30% lg:to-ink/10" />
-        <div className="absolute inset-x-0 top-0 hidden h-28 bg-gradient-to-b from-ink/60 to-transparent lg:block" />
-        <div className="absolute inset-x-0 bottom-0 hidden h-32 bg-gradient-to-t from-ink/70 to-transparent lg:block" />
-      </div>
-
-      <div className="relative mx-auto w-full max-w-[1440px] px-5 pb-12 sm:px-8 lg:flex lg:min-h-[100svh] lg:items-center lg:px-10 lg:pt-[72px] lg:pb-24">
-        <div className="-mt-32 text-center md:-mt-40 lg:mt-0 lg:max-w-[520px] lg:text-left">
-          <h1 className="font-display text-[44px] leading-[1.02] pb-2 font-normal text-gold-metal sm:text-[56px] lg:text-[68px]">
-            Stăpânește arta
-            <br />
-            unghiilor impecabile
+    <section className="bg-ink text-ivory">
+      <div className="mx-auto grid w-full max-w-[1320px] grid-cols-1 gap-14 px-5 pt-28 pb-16 sm:px-8 lg:grid-cols-12 lg:gap-8 lg:px-10 lg:pt-40 lg:pb-28">
+        <div className="lg:col-span-6 lg:self-center">
+          <h1 className="font-display text-[48px] leading-[0.98] font-light tracking-[-0.015em] sm:text-[66px] lg:text-[82px]">
+            Stăpânește arta unghiilor <em className="text-champagne italic">impecabile</em>
           </h1>
 
-          <p className="mx-auto mt-5 max-w-[28rem] text-[15px] leading-[1.6] text-ivory sm:text-[16px] lg:mx-0 lg:text-[18px]">
-            Descoperă cursuri profesionale de manichiură create pentru a-ți perfecționa tehnica,
-            a-ți construi încrederea și a-ți transforma cariera în beauty.
+          <p className="mt-7 max-w-[30rem] text-[16px] leading-[1.65] text-ivory/70 lg:text-[18px]">
+            Cursuri video de manichiură, explicate pas cu pas de fondatoarea GJ Nail Studio. Înveți de
+            pe telefon sau calculator, în ritmul tău, și primești certificat la final.
           </p>
 
-          <ButtonLink href="#cursuri" className="mt-7">
-            Descoperă cursurile
-          </ButtonLink>
+          <div className="mt-10 flex flex-wrap items-center gap-x-8 gap-y-5">
+            <ButtonLink href="#cursuri">Descoperă cursurile</ButtonLink>
+            {course && (
+              <Link
+                href={`/cursuri/${course.slug}`}
+                className="text-[14px] text-ivory/80 underline decoration-champagne/40 underline-offset-[6px] transition-colors hover:text-ivory hover:decoration-champagne"
+              >
+                {freeLesson ? 'Vezi lecția gratuită' : 'Vezi programa'}
+              </Link>
+            )}
+          </div>
+        </div>
+
+        {/* Previzualizare: primul curs, cu începutul programei — ce primești, nu o promisiune */}
+        <div className="lg:col-span-5 lg:col-start-8">
+          <figure className="border border-champagne/20 bg-ink-soft">
+            <div className="relative aspect-[5/4] overflow-hidden">
+              <Image
+                src="/images/hero-hands-face.jpg"
+                alt="Femeie cu manichiură nude, cu mâinile lângă față"
+                fill
+                preload
+                sizes="(min-width: 1320px) 520px, (min-width: 1024px) 40vw, 100vw"
+                className="object-cover object-[50%_35%]"
+              />
+              {freeLesson && (
+                <span className="absolute bottom-4 left-4 flex items-center gap-2.5">
+                  <span className="flex size-10 items-center justify-center rounded-full bg-ivory text-ink">
+                    <Play className="ml-0.5 size-4 fill-current" strokeWidth={0} aria-hidden="true" />
+                  </span>
+                  <Badge>Lecție gratuită</Badge>
+                </span>
+              )}
+            </div>
+
+            {course && (
+              <figcaption className="px-5 pt-5 pb-2 sm:px-6">
+                <p className="font-display text-[26px] leading-tight">{course.title}</p>
+
+                <ol className="mt-4">
+                  {course.lessons.slice(0, PREVIEW_LESSONS).map((lesson, i) => (
+                    <li
+                      key={lesson.id}
+                      className="flex items-baseline gap-4 border-t border-champagne/15 py-3 text-[14px]"
+                    >
+                      <span className="font-mono text-[12px] text-champagne/80">
+                        {String(i + 1).padStart(2, '0')}
+                      </span>
+                      <span className="min-w-0 flex-1 text-ivory/85 sm:truncate">{lesson.title}</span>
+                      <span className="font-mono text-[12px] text-ivory/50">
+                        {formatDuration(lesson.durationSeconds)}
+                      </span>
+                    </li>
+                  ))}
+                </ol>
+
+                <div className="flex items-baseline justify-between gap-4 border-t border-champagne/15 py-4 font-mono text-[12px] text-ivory/50">
+                  <span>
+                    {lessonsLabel(course.lessons.length)}, {formatDuration(course.totalSeconds)}
+                  </span>
+                  <span className="text-[15px] text-ivory">{formatMdl(course.priceMdl)}</span>
+                </div>
+              </figcaption>
+            )}
+          </figure>
         </div>
       </div>
-
-      <Link
-        href="#beneficii"
-        className="group absolute bottom-8 left-1/2 hidden -translate-x-1/2 flex-col items-center gap-4 lg:flex"
-      >
-        <span className="text-[11px] font-medium uppercase tracking-[0.32em] text-ivory/80 transition-colors duration-300 group-hover:text-champagne-light">
-          Află mai multe
-        </span>
-        <span aria-hidden="true" className="relative h-14 w-px overflow-hidden bg-ivory/20">
-          <span className="absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-transparent via-champagne-light to-transparent motion-safe:animate-scroll-cue" />
-        </span>
-      </Link>
     </section>
   )
 }

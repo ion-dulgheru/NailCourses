@@ -14,7 +14,7 @@ import { cn } from '@/lib/utils'
 const initialState: AccountFormState = { ok: false, message: '' }
 
 const inputClass =
-  'mt-1.5 block h-12 w-full border border-line bg-ivory px-4 text-[16px] text-ink placeholder:text-stone/50 outline-none transition-colors hover:border-champagne focus:border-bronze focus:ring-1 focus:ring-bronze aria-[invalid=true]:border-red-600'
+  'mt-1.5 block h-12 w-full border border-champagne/20 bg-ivory px-4 text-[16px] text-ink placeholder:text-stone/50 outline-none transition-colors hover:border-champagne focus:border-bronze focus:ring-1 focus:ring-bronze aria-[invalid=true]:border-red-600'
 
 function Field({
   id,
@@ -57,7 +57,7 @@ function Submit({ label, pendingLabel, danger }: { label: string; pendingLabel: 
       type="submit"
       disabled={pending}
       className={cn(
-        'inline-flex h-11 items-center justify-center px-6 text-[12px] font-medium uppercase tracking-[0.14em] transition disabled:opacity-60',
+        'inline-flex h-11 items-center justify-center px-6 text-[14px] font-medium transition disabled:opacity-60',
         danger
           ? 'bg-red-700 text-ivory hover:bg-red-800'
           : 'bg-ink text-ivory hover:bg-ink-soft',
@@ -134,7 +134,7 @@ export function DeleteAccountForm() {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="inline-flex h-11 items-center justify-center border border-red-200 px-6 text-[12px] font-medium uppercase tracking-[0.14em] text-red-700 transition-colors hover:border-red-600 hover:bg-red-50"
+        className="inline-flex h-11 items-center justify-center border border-red-200 px-6 text-[14px] font-medium text-red-700 transition-colors hover:border-red-600 hover:bg-red-50"
       >
         Șterge contul
       </button>

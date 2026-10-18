@@ -19,12 +19,12 @@ export function AdminPageHeader({
   actions?: React.ReactNode
 }) {
   return (
-    <header className="flex flex-col gap-5 border-b border-line pb-6 sm:flex-row sm:items-end sm:justify-between">
+    <header className="flex flex-col gap-5 border-b border-champagne/20 pb-6 sm:flex-row sm:items-end sm:justify-between">
       <div className="min-w-0">
         {eyebrow && (
-          <p className="text-[11px] font-medium uppercase tracking-[0.24em] text-bronze">{eyebrow}</p>
+          <p className="text-[12px] font-medium text-bronze">{eyebrow}</p>
         )}
-        <h1 className="mt-1.5 font-display text-[34px] leading-tight text-ink sm:text-[40px]">{title}</h1>
+        <h1 className="mt-1.5 font-display text-[36px] leading-tight font-light text-ink sm:text-[44px]">{title}</h1>
         {description && <p className="mt-2 text-[14px] text-stone">{description}</p>}
       </div>
       {actions && <div className="flex shrink-0 flex-wrap gap-3">{actions}</div>}
@@ -44,10 +44,10 @@ export function AdminCard({
   children: React.ReactNode
 }) {
   return (
-    <section className={cn('border border-line bg-ivory', className)}>
+    <section className={cn('border border-champagne/20 bg-ivory', className)}>
       {title && (
-        <div className="border-b border-line px-5 py-4 sm:px-6">
-          <h2 className="font-display text-[22px] leading-tight text-ink">{title}</h2>
+        <div className="border-b border-champagne/20 px-5 py-4 sm:px-6">
+          <h2 className="font-display text-[24px] leading-tight text-ink">{title}</h2>
           {description && <p className="mt-1 text-[13px] text-stone">{description}</p>}
         </div>
       )}
@@ -116,7 +116,7 @@ export function StatusBadge({ status }: { status: 'ciorna' | 'publicat' }) {
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-1.5 px-2 py-0.5 text-[11px] font-medium uppercase tracking-[0.1em]',
+        'inline-flex items-center gap-1.5 px-2 py-0.5 text-[12px] font-medium',
         status === 'publicat' ? 'bg-emerald-50 text-emerald-800' : 'bg-stone/10 text-stone',
       )}
     >

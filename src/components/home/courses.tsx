@@ -1,5 +1,6 @@
-import { ButtonLink, SectionTitle, container } from './primitives'
-import { CourseCard } from '@/components/courses/course-card'
+import Link from 'next/link'
+import { SectionTitle, container } from './primitives'
+import { CourseIndex } from '@/components/courses/course-index'
 import { getPublishedCourses } from '@/lib/courses'
 
 export async function Courses() {
@@ -7,24 +8,28 @@ export async function Courses() {
   if (courses.length === 0) return null
 
   return (
-    <section id="cursuri" className="scroll-mt-4 bg-ivory pt-14 pb-16 lg:pt-20 lg:pb-24">
-      <div className={container}>
-        <SectionTitle>Cursuri recomandate</SectionTitle>
+    <section id="cursuri" className="scroll-mt-4 bg-ivory py-16 lg:py-28">
+      <div className={`${container} grid gap-10 lg:grid-cols-12 lg:gap-8`}>
+        <div className="lg:col-span-4">
+          <div className="lg:sticky lg:top-28">
+            <SectionTitle>
+              Cursurile, <em>pas cu pas</em>
+            </SectionTitle>
+            <p className="mt-5 max-w-[24rem] text-[15px] leading-[1.65] text-stone lg:text-[16px]">
+              Începi cu bazele dacă n-ai mai lucrat, sau sari direct la nivelul tău. Fiecare curs se
+              cumpără separat.
+            </p>
+            <Link
+              href="/cursuri"
+              className="mt-6 inline-block text-[14px] text-ink underline decoration-champagne/50 underline-offset-[6px] transition-colors hover:decoration-bronze"
+            >
+              Vezi toate cursurile
+            </Link>
+          </div>
+        </div>
 
-        {/* Pe telefon: carduri întregi care se glisează lateral (următorul se vede pe margine).
-            De la lg: grilă pe 3 coloane. */}
-        <ul className="-mx-5 mt-8 flex snap-x snap-mandatory scroll-px-5 gap-4 overflow-x-auto px-5 pb-2 [scrollbar-width:none] sm:-mx-8 sm:scroll-px-8 sm:px-8 lg:mx-0 lg:mt-12 lg:grid lg:grid-cols-3 lg:gap-8 lg:overflow-visible lg:px-0 [&::-webkit-scrollbar]:hidden">
-          {courses.map((course) => (
-            <li key={course.id} className="w-[84%] shrink-0 snap-start sm:w-[46%] lg:w-auto">
-              <CourseCard course={course} />
-            </li>
-          ))}
-        </ul>
-
-        <div className="mt-10 text-center lg:mt-14">
-          <ButtonLink href="/cursuri" variant="outline-dark" className="px-10">
-            Vezi toate cursurile
-          </ButtonLink>
+        <div className="lg:col-span-8">
+          <CourseIndex courses={courses} />
         </div>
       </div>
     </section>

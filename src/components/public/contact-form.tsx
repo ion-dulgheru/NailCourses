@@ -8,7 +8,7 @@ import { cn } from '@/lib/utils'
 const initialState: ContactFormState = { ok: false, message: '' }
 
 const inputClass =
-  'mt-1.5 block w-full border border-line bg-ivory px-4 py-3 text-[16px] text-ink placeholder:text-stone/50 outline-none transition-colors hover:border-champagne focus:border-bronze focus:ring-1 focus:ring-bronze aria-[invalid=true]:border-red-600'
+  'mt-1.5 block w-full border border-champagne/20 bg-ivory px-4 py-3 text-[16px] text-ink placeholder:text-stone/50 outline-none transition-colors hover:border-champagne focus:border-bronze focus:ring-1 focus:ring-bronze aria-[invalid=true]:border-red-600'
 
 function Submit() {
   const { pending } = useFormStatus()
@@ -16,7 +16,7 @@ function Submit() {
     <button
       type="submit"
       disabled={pending}
-      className="inline-flex h-12 w-full items-center justify-center bg-ink px-8 text-[12px] font-medium uppercase tracking-[0.14em] text-ivory transition hover:bg-ink-soft disabled:opacity-60 sm:w-auto"
+      className="inline-flex h-12 w-full items-center justify-center bg-ink px-8 text-[14px] font-medium text-ivory transition hover:bg-ink-soft disabled:opacity-60 sm:w-auto"
     >
       {pending ? 'Se trimite…' : 'Trimite mesajul'}
     </button>

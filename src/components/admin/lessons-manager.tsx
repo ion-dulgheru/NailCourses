@@ -160,15 +160,15 @@ export function LessonsManager({ courseId, lessons }: { courseId: string; lesson
             {editing === lesson.id ? (
               <LessonForm courseId={courseId} lesson={lesson} onDone={close} />
             ) : (
-              <div className="flex flex-col gap-3 border border-line px-4 py-3 sm:flex-row sm:items-center">
+              <div className="flex flex-col gap-3 border border-champagne/20 px-4 py-3 sm:flex-row sm:items-center">
                 <div className="flex min-w-0 flex-1 items-start gap-3">
-                  <span className="w-6 shrink-0 font-display text-[20px] leading-6 text-bronze">
+                  <span className="w-6 shrink-0 font-mono text-[13px] leading-6 text-bronze">
                     {String(i + 1).padStart(2, '0')}
                   </span>
                   <div className="min-w-0">
                     <p className="text-[15px] leading-6 text-ink">{lesson.title}</p>
                     <p className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[12px] text-stone">
-                      <span>{formatDuration(lesson.durationSeconds)}</span>
+                      <span className="font-mono">{formatDuration(lesson.durationSeconds)}</span>
                       {lesson.videoCount > 0 ? (
                         <span className="inline-flex items-center gap-1 text-emerald-700">
                           <Video className="size-3.5" strokeWidth={1.5} aria-hidden="true" />
@@ -181,7 +181,7 @@ export function LessonsManager({ courseId, lessons }: { courseId: string; lesson
                       )}
                       <span>{lesson.blockCount === 1 ? '1 bloc' : `${lesson.blockCount} blocuri`}</span>
                       {lesson.isFreePreview && (
-                        <span className="bg-ink px-1.5 py-0.5 text-[10px] uppercase tracking-[0.1em] text-champagne-light">
+                        <span className="bg-ink px-1.5 py-0.5 text-[12px] text-champagne-light">
                           Probă gratuită
                         </span>
                       )}

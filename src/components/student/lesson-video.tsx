@@ -25,6 +25,7 @@ export function LessonVideo({
   const containerRef = useRef<HTMLDivElement>(null)
   const videoRef = useRef<HTMLVideoElement>(null)
   const resumeAt = useRef(0)
+  const retried = useRef(false)
   const [file, setFile] = useState<FileState>({ status: 'loading' })
   const [fullscreen, setFullscreen] = useState(false)
 
@@ -63,7 +64,10 @@ export function LessonVideo({
   }
 
   const onVideoError = () => {
+    // Un link proaspăt care tot nu merge (ex: fișier corupt) → eroare, nu buclă de reîncercări.
+    if (retried.current) return setFile({ status: 'error' })
     // Link expirat în timpul vizionării: luăm altul și continuăm de unde a rămas.
+    retried.current = true
     resumeAt.current = videoRef.current?.currentTime ?? 0
     void loadUrl()
   }
@@ -73,7 +77,7 @@ export function LessonVideo({
       <div
         ref={containerRef}
         onContextMenu={(e) => e.preventDefault()}
-        className="relative flex aspect-video w-full items-center justify-center overflow-hidden bg-black sm:border sm:border-ivory/10 [&:fullscreen]:aspect-auto [&:fullscreen]:border-0"
+        className="relative flex aspect-video w-full items-center justify-center overflow-hidden bg-black sm:border sm:border-champagne/15 [&:fullscreen]:aspect-auto [&:fullscreen]:border-0"
       >
         {source.kind === 'youtube' ? (
           <iframe
@@ -95,6 +99,9 @@ export function LessonVideo({
             controlsList="nodownload nofullscreen noremoteplayback"
             onLoadedMetadata={(e) => {
               if (resumeAt.current) e.currentTarget.currentTime = resumeAt.current
+            }}
+            onPlaying={() => {
+              retried.current = false
             }}
             onError={onVideoError}
             className="absolute inset-0 size-full"

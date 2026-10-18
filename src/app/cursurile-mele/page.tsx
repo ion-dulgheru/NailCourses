@@ -3,7 +3,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { HomeHeader } from '@/components/home/home-header'
 import { HomeFooter } from '@/components/home/home-footer'
-import { ButtonLink, container } from '@/components/home/primitives'
+import { Badge, ButtonLink, container } from '@/components/home/primitives'
 import { ProgressBar } from '@/components/student/progress-bar'
 import { getMyCourses, requireStudent } from '@/lib/student'
 
@@ -23,10 +23,10 @@ export default async function MyCoursesPage() {
       <main>
         <section className="bg-ink pt-32 pb-12 text-ivory lg:pt-40 lg:pb-16">
           <div className={container}>
-            <p className="text-[11px] font-medium uppercase tracking-[0.32em] text-champagne-light">
+            <p className="text-[14px] text-champagne-light/80">
               Bună, {user.surname || user.name}
             </p>
-            <h1 className="mt-4 pb-1 font-display text-[44px] leading-[1.05] font-normal text-gold-metal sm:text-[56px]">
+            <h1 className="mt-4 font-display text-[44px] leading-[1] font-light tracking-[-0.015em] sm:text-[56px]">
               Cursurile mele
             </h1>
             <p className="mt-4 max-w-[32rem] text-[15px] leading-[1.65] text-ivory/70">
@@ -38,7 +38,7 @@ export default async function MyCoursesPage() {
         <section className="py-12 lg:py-16">
           <div className={container}>
             {courses.length === 0 ? (
-              <div className="mx-auto max-w-lg border border-line px-6 py-14 text-center">
+              <div className="max-w-lg border-t border-champagne/20 pt-10">
                 <p className="font-display text-[30px] leading-tight text-ink">Încă nu ai niciun curs</p>
                 <p className="mt-3 text-[15px] leading-[1.6] text-stone">
                   După ce primești acces la un curs, îl găsești aici și îl poți urmări oricând.
@@ -48,7 +48,7 @@ export default async function MyCoursesPage() {
                 </ButtonLink>
               </div>
             ) : (
-              <ul className="grid gap-x-8 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
+              <ul className="border-b border-champagne/20">
                 {courses.map((course) => {
                   const { progress } = course
                   const hasLessons = progress.total > 0
@@ -56,54 +56,55 @@ export default async function MyCoursesPage() {
                   const continueHref = `/cursurile-mele/${course.slug}/${progress.nextLessonSlug}`
 
                   return (
-                    <li key={course.id}>
-                      <article className="group flex h-full flex-col">
-                        <Link
-                          href={`/cursurile-mele/${course.slug}`}
-                          className="relative block aspect-[11/10] overflow-hidden bg-sand"
-                        >
-                          <Image
-                            src={course.coverImage}
-                            alt={course.coverAlt}
-                            fill
-                            sizes="(min-width: 1200px) 370px, (min-width: 640px) 50vw, 100vw"
-                            className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
-                          />
-                          {progress.finished && (
-                            <span className="absolute top-3 left-3 bg-ink/85 px-3 py-1.5 text-[10px] font-medium uppercase tracking-[0.16em] text-champagne-light">
-                              Finalizat
-                            </span>
-                          )}
-                        </Link>
+                    <li
+                      key={course.id}
+                      className="grid grid-cols-1 gap-5 border-t border-champagne/20 py-8 sm:grid-cols-[200px_minmax(0,1fr)] sm:gap-8 lg:grid-cols-[240px_minmax(0,1fr)_auto] lg:items-center lg:gap-10"
+                    >
+                      <Link
+                        href={`/cursurile-mele/${course.slug}`}
+                        tabIndex={-1}
+                        aria-hidden="true"
+                        className="relative block aspect-[16/10] overflow-hidden bg-sand sm:aspect-[4/3]"
+                      >
+                        <Image
+                          src={course.coverImage}
+                          alt=""
+                          fill
+                          sizes="(min-width: 1024px) 240px, (min-width: 640px) 200px, 100vw"
+                          className="object-cover"
+                        />
+                      </Link>
 
-                        <div className="flex flex-1 flex-col pt-5">
-                          {course.category && (
-                            <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-bronze">
-                              {course.category}
-                            </p>
-                          )}
-                          <h2 className="mt-1.5 font-display text-[26px] leading-tight text-ink">
-                            <Link href={`/cursurile-mele/${course.slug}`} className="hover:text-bronze">
-                              {course.title}
-                            </Link>
-                          </h2>
-
-                          <ProgressBar
-                            done={progress.done}
-                            total={progress.total}
-                            label={`Progres ${course.title}`}
-                            className="mt-auto pt-5"
-                          />
-
-                          {hasLessons ? (
-                            <ButtonLink href={continueHref} className="mt-5 self-start">
-                              {cta}
-                            </ButtonLink>
-                          ) : (
-                            <p className="mt-5 text-[13px] text-stone">Lecțiile vor fi disponibile în curând.</p>
-                          )}
+                      <div className="min-w-0">
+                        <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+                          {progress.finished && <Badge>Finalizat</Badge>}
+                          {course.category && <span className="text-[13px] text-stone">{course.category}</span>}
                         </div>
-                      </article>
+                        <h2 className="mt-2 font-display text-[30px] leading-[1.05] text-ink lg:text-[34px]">
+                          <Link href={`/cursurile-mele/${course.slug}`} className="transition-colors hover:text-bronze">
+                            {course.title}
+                          </Link>
+                        </h2>
+                        <ProgressBar
+                          done={progress.done}
+                          total={progress.total}
+                          label={`Progres ${course.title}`}
+                          className="mt-5 max-w-md"
+                        />
+                      </div>
+
+                      <div className="sm:col-start-2 lg:col-start-3">
+                        {hasLessons ? (
+                          <ButtonLink
+                            href={continueHref}
+                            variant={progress.finished ? 'outline-dark' : 'gold'}
+                          >
+                            {cta}
+                          </ButtonLink>
+                        ) : (
+                          <p className="text-[13px] text-stone">Lecțiile vor fi disponibile în curând.</p>
+                        )}
+                      </div>
                     </li>
                   )
                 })}

@@ -16,9 +16,9 @@ const dateFormat = new Intl.DateTimeFormat('ro-RO', { day: 'numeric', month: 'lo
 
 function Section({ title, description, children }: { title: string; description?: React.ReactNode; children: React.ReactNode }) {
   return (
-    <section className="grid gap-6 border-t border-line py-10 lg:grid-cols-[280px_minmax(0,1fr)] lg:gap-14">
+    <section className="grid gap-6 border-t border-champagne/20 py-10 lg:grid-cols-[280px_minmax(0,1fr)] lg:gap-14">
       <div>
-        <h2 className="font-display text-[26px] leading-tight text-ink">{title}</h2>
+        <h2 className="font-display text-[30px] leading-tight font-light text-ink">{title}</h2>
         {description && <p className="mt-2 text-[14px] leading-[1.6] text-stone">{description}</p>}
       </div>
       <div className="max-w-[560px]">{children}</div>
@@ -47,24 +47,29 @@ export default async function AccountPage() {
       <main>
         <section className="bg-ink pt-32 pb-12 text-ivory lg:pt-40 lg:pb-16">
           <div className={container}>
-            <p className="text-[11px] font-medium uppercase tracking-[0.32em] text-champagne-light">Contul tău</p>
-            <h1 className="mt-4 pb-1 font-display text-[44px] leading-[1.05] font-normal text-gold-metal sm:text-[56px]">
+            <p className="text-[14px] text-champagne-light/80">Contul tău</p>
+            <h1 className="mt-4 font-display text-[44px] leading-[1] font-light tracking-[-0.015em] sm:text-[56px]">
               Contul meu
             </h1>
-            <p className="mt-4 text-[15px] text-ivory/70">
-              Cont creat pe {dateFormat.format(user.createdAt)} ·{' '}
-              <Link href="/cursurile-mele" className="underline decoration-ivory/30 underline-offset-4 hover:text-champagne-light">
-                {user._count.enrollments} {user._count.enrollments === 1 ? 'curs' : 'cursuri'}
-              </Link>{' '}
-              ·{' '}
-              <Link href="/certificate" className="underline decoration-ivory/30 underline-offset-4 hover:text-champagne-light">
-                {user._count.certificates} {user._count.certificates === 1 ? 'certificat' : 'certificate'}
-              </Link>{' '}
-              ·{' '}
-              <Link href="/cont/comenzi" className="underline decoration-ivory/30 underline-offset-4 hover:text-champagne-light">
-                istoric comenzi
-              </Link>
-            </p>
+            <p className="mt-4 text-[15px] text-ivory/60">Cont creat pe {dateFormat.format(user.createdAt)}</p>
+            <ul className="mt-8 flex flex-wrap gap-x-8 gap-y-3 border-t border-champagne/15 pt-6 text-[15px]">
+              <li>
+                <Link href="/cursurile-mele" className="text-ivory underline decoration-champagne/40 underline-offset-[6px] hover:decoration-champagne">
+                  <span className="font-mono">{user._count.enrollments}</span> {user._count.enrollments === 1 ? 'curs' : 'cursuri'}
+                </Link>
+              </li>
+              <li>
+                <Link href="/certificate" className="text-ivory underline decoration-champagne/40 underline-offset-[6px] hover:decoration-champagne">
+                  <span className="font-mono">{user._count.certificates}</span>{' '}
+                  {user._count.certificates === 1 ? 'certificat' : 'certificate'}
+                </Link>
+              </li>
+              <li>
+                <Link href="/cont/comenzi" className="text-ivory underline decoration-champagne/40 underline-offset-[6px] hover:decoration-champagne">
+                  Istoric comenzi
+                </Link>
+              </li>
+            </ul>
           </div>
         </section>
 
@@ -74,7 +79,7 @@ export default async function AccountPage() {
           </Section>
 
           <Section title="Email" description="Adresa cu care te autentifici.">
-            <p className="flex h-12 items-center border border-line bg-sand/60 px-4 text-[16px] text-ink">{user.email}</p>
+            <p className="flex h-12 items-center border border-champagne/20 bg-sand px-4 text-[16px] text-ink">{user.email}</p>
             <p className="mt-2 text-[13px] text-stone">
               Pentru a schimba adresa de email,{' '}
               <Link href="/contact" className="text-bronze underline underline-offset-4 hover:text-ink">

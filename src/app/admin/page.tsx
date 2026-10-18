@@ -81,9 +81,9 @@ export default async function AdminDashboard() {
           <li key={s.label}>
             <Link
               href={s.href}
-              className="block h-full border border-line bg-ivory px-5 py-5 transition-colors hover:border-champagne"
+              className="block h-full border border-champagne/20 bg-ivory px-5 py-5 transition-colors hover:border-champagne"
             >
-              <p className="font-display text-[34px] leading-none text-ink sm:text-[40px]">{s.value}</p>
+              <p className="font-mono text-[26px] leading-none text-ink sm:text-[30px]">{s.value}</p>
               <p className="mt-2 text-[13px] text-stone">{s.label}</p>
             </Link>
           </li>
@@ -94,7 +94,7 @@ export default async function AdminDashboard() {
         {recentOrders.length === 0 ? (
           <p className="text-[14px] text-stone">Încă nu există comenzi. Ele apar aici după activarea plăților.</p>
         ) : (
-          <ul className="-my-3 divide-y divide-line/70">
+          <ul className="-my-3 divide-y divide-champagne/20/70">
             {recentOrders.map((o) => (
               <li key={o.id} className="flex flex-col gap-1.5 py-3 sm:flex-row sm:items-center sm:justify-between">
                 <div className="min-w-0">
@@ -104,7 +104,7 @@ export default async function AdminDashboard() {
                   <span className="text-[13px] text-stone"> · {o.course.title}</span>
                 </div>
                 <div className="flex shrink-0 items-center gap-3 text-[12px] text-stone">
-                  <span className="text-ink">{formatMdl(o.amountMdl)}</span>
+                  <span className="font-mono text-ink">{formatMdl(o.amountMdl)}</span>
                   <OrderStatusBadge status={o.status} />
                   {dateFormat.format(o.createdAt)}
                 </div>
@@ -124,7 +124,7 @@ export default async function AdminDashboard() {
             .
           </p>
         ) : (
-          <ul className="-my-3 divide-y divide-line/70">
+          <ul className="-my-3 divide-y divide-champagne/20/70">
             {recent.map((e) => (
               <li key={e.id} className="flex flex-col gap-1 py-3 sm:flex-row sm:items-center sm:justify-between">
                 <div className="min-w-0">

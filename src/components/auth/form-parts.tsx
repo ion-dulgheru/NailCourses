@@ -2,13 +2,13 @@
 
 import { useState } from "react";
 import { useFormStatus } from "react-dom";
-import { ArrowRight, Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 // Piese comune pentru formularele de cont (fundal negru, accente aurii).
 
 export const inputClass =
-  "mt-1 block h-11 w-full rounded-none border-0 border-b border-ivory/20 bg-transparent px-0 text-[16px] text-ivory placeholder:text-ivory/25 outline-none transition-colors hover:border-ivory/40 focus:border-champagne";
+  "mt-1 block h-11 w-full rounded-none border-0 border-b border-champagne/20 bg-transparent px-0 text-[16px] text-ivory placeholder:text-ivory/25 outline-none transition-colors hover:border-ivory/40 focus:border-champagne";
 
 export const linkClass =
   "text-champagne-light underline decoration-champagne/40 underline-offset-4 transition-colors hover:text-ivory hover:decoration-ivory";
@@ -26,14 +26,9 @@ export function FormHeader({
 }) {
   return (
     <header>
-      <p className="flex items-center gap-3 text-[11px] font-medium uppercase tracking-[0.3em] text-champagne-light">
-        <span aria-hidden="true" className="h-px w-8 bg-gold-metal" />
-        {eyebrow}
-      </p>
-      <h1 className="mt-5 font-display text-[42px] leading-[1.02] font-normal text-ivory sm:text-[48px]">
-        {title}
-        <br />
-        <span className="text-gold-metal italic">{accent}</span>
+      <p className="text-[14px] text-champagne-light/80">{eyebrow}</p>
+      <h1 className="mt-3 font-display text-[44px] leading-[1] font-light tracking-[-0.01em] text-ivory sm:text-[52px]">
+        {title} <em className="text-champagne italic">{accent}</em>
       </h1>
       <p className="mt-4 text-[15px] leading-[1.6] text-ivory/65">{children}</p>
     </header>
@@ -123,8 +118,8 @@ export function SubmitButton({ label, pendingLabel }: { label: string; pendingLa
       type="submit"
       disabled={pending}
       className={cn(
-        "group/btn inline-flex h-[52px] w-full items-center justify-center gap-3 bg-gold-metal px-7 text-[12px] font-semibold uppercase tracking-[0.18em] text-ink shadow-[inset_0_1px_0_rgba(255,255,255,0.35),0_10px_30px_-12px_rgba(200,170,110,0.55)] transition duration-300 hover:brightness-110 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-champagne",
-        pending && "cursor-wait opacity-70 hover:brightness-100",
+        "inline-flex h-[52px] w-full items-center justify-center gap-3 bg-champagne px-7 text-[15px] font-medium text-ink transition-colors duration-300 hover:bg-champagne-light focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-champagne",
+        pending && "cursor-wait opacity-70 hover:bg-champagne",
       )}
     >
       {pending ? (
@@ -133,10 +128,7 @@ export function SubmitButton({ label, pendingLabel }: { label: string; pendingLa
           {pendingLabel}
         </>
       ) : (
-        <>
-          {label}
-          <ArrowRight size={16} strokeWidth={1.75} className="transition-transform duration-300 group-hover/btn:translate-x-1" />
-        </>
+        label
       )}
     </button>
   );

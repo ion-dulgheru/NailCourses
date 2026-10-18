@@ -45,7 +45,7 @@ export default async function ContactPage() {
 
         <aside className="space-y-10">
           <div>
-            <h2 className="text-[11px] font-medium uppercase tracking-[0.24em] text-bronze">Date de contact</h2>
+            <h2 className="font-display text-[28px] leading-tight font-light text-ink">Date de contact</h2>
             <dl className="mt-4 space-y-4">
               {details.map((d) => (
                 <div key={d.label}>
@@ -66,7 +66,7 @@ export default async function ContactPage() {
 
           {company.length > 0 && (
             <div>
-              <h2 className="text-[11px] font-medium uppercase tracking-[0.24em] text-bronze">Datele firmei</h2>
+              <h2 className="font-display text-[28px] leading-tight font-light text-ink">Datele firmei</h2>
               <dl className="mt-4 space-y-4">
                 {company.map((row) => (
                   <div key={row.label}>

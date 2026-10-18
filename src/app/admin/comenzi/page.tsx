@@ -63,7 +63,7 @@ export default async function OrdersPage({ searchParams }: { searchParams: Promi
                   aria-current={active ? 'page' : undefined}
                   className={cn(
                     'inline-flex h-9 items-center border px-4 text-[13px] transition-colors',
-                    active ? 'border-ink bg-ink text-ivory' : 'border-line bg-ivory text-stone hover:border-ink hover:text-ink',
+                    active ? 'border-ink bg-ink text-ivory' : 'border-champagne/20 bg-ivory text-stone hover:border-ink hover:text-ink',
                   )}
                 >
                   {f.label}
@@ -80,13 +80,13 @@ export default async function OrdersPage({ searchParams }: { searchParams: Promi
       </p>
 
       {orders.length === 0 ? (
-        <div className="border border-dashed border-line bg-ivory px-6 py-12 text-center text-[14px] text-stone">
+        <div className="border border-dashed border-champagne/20 bg-ivory px-6 py-12 text-center text-[14px] text-stone">
           {status ? 'Nicio comandă în această stare.' : 'Încă nu există comenzi. Ele vor apărea aici după activarea plăților.'}
         </div>
       ) : (
-        <div className="overflow-x-auto border border-line bg-ivory">
+        <div className="overflow-x-auto border border-champagne/20 bg-ivory">
           <table className="w-full min-w-[860px] text-left text-[14px]">
-            <thead className="border-b border-line bg-sand/60 text-[11px] uppercase tracking-[0.12em] text-stone">
+            <thead className="border-b border-champagne/20 bg-sand/60 text-[12px] text-stone">
               <tr>
                 <th scope="col" className="px-5 py-3 font-medium">Data</th>
                 <th scope="col" className="px-5 py-3 font-medium">Elev</th>
@@ -97,7 +97,7 @@ export default async function OrdersPage({ searchParams }: { searchParams: Promi
                 <th scope="col" className="px-5 py-3"><span className="sr-only">Acțiuni</span></th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-line/70">
+            <tbody className="divide-y divide-champagne/20/70">
               {orders.map((o) => (
                 <tr key={o.id} className="align-top transition-colors hover:bg-sand/40">
                   <td className="px-5 py-3.5 whitespace-nowrap text-stone">{dateFormat.format(o.createdAt)}</td>
@@ -108,7 +108,7 @@ export default async function OrdersPage({ searchParams }: { searchParams: Promi
                     <p className="text-[12px] text-stone">{o.user.email}</p>
                   </td>
                   <td className="px-5 py-3.5 text-ink">{o.course.title}</td>
-                  <td className="px-5 py-3.5 whitespace-nowrap text-ink">{formatMdl(o.amountMdl)}</td>
+                  <td className="px-5 py-3.5 font-mono whitespace-nowrap text-ink">{formatMdl(o.amountMdl)}</td>
                   <td className="px-5 py-3.5"><OrderStatusBadge status={o.status} /></td>
                   <td className="px-5 py-3.5 font-mono text-[12px] text-stone">{o.maibTransactionId ?? '—'}</td>
                   <td className="px-5 py-3.5 text-right">

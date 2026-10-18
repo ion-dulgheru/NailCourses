@@ -6,7 +6,7 @@ import { Award, BarChart3, Check, Clock, Lock, PlayCircle } from 'lucide-react'
 import { HomeHeader } from '@/components/home/home-header'
 import { HomeFooter } from '@/components/home/home-footer'
 import { Instructor } from '@/components/home/instructor'
-import { ButtonLink, SectionTitle, container } from '@/components/home/primitives'
+import { Badge, ButtonLink, SectionTitle, container } from '@/components/home/primitives'
 import {
   formatDuration,
   formatMdl,
@@ -14,6 +14,8 @@ import {
   lessonsLabel,
   levelLabel,
 } from '@/lib/courses'
+import { getCurrentUser } from '@/lib/current-user'
+import { getMyCourse } from '@/lib/student'
 
 type Params = { params: Promise<{ slug: string }> }
 
@@ -32,18 +34,55 @@ export default async function CoursePage({ params }: Params) {
   const course = await getPublishedCourse((await params).slug)
   if (!course) notFound()
 
-  const buyHref = `/checkout/${course.slug}`
+  // Eleva care are deja acces (cumpărat sau acordat de admin) e trimisă la curs, nu la plată.
+  const user = await getCurrentUser()
+  const mine = user ? await getMyCourse(user.id, course.slug) : null
+  const cta = mine
+    ? {
+        href: `/cursurile-mele/${course.slug}`,
+        label: mine.progress.finished ? 'Revezi cursul' : mine.progress.done > 0 ? 'Continuă cursul' : 'Începe cursul',
+      }
+    : { href: `/checkout/${course.slug}`, label: 'Cumpără cursul' }
   const price = formatMdl(course.priceMdl)
 
   const facts = [
-    { icon: BarChart3, label: 'Nivel', value: levelLabel(course.level) },
-    { icon: PlayCircle, label: 'Lecții', value: lessonsLabel(course.lessons.length) },
-    { icon: Clock, label: 'Durată', value: formatDuration(course.totalSeconds) },
-    { icon: Award, label: 'La final', value: 'Certificat' },
+    { icon: BarChart3, label: 'Nivel', value: levelLabel(course.level), mono: false },
+    { icon: PlayCircle, label: 'Lecții', value: lessonsLabel(course.lessons.length), mono: true },
+    { icon: Clock, label: 'Durată', value: formatDuration(course.totalSeconds), mono: true },
+    { icon: Award, label: 'La final', value: 'Certificat', mono: false },
   ]
+
+  // Date structurate pentru Google (tipul Course): titlu, descriere, preț, organizator.
+  const site = (process.env.SITE_URL ?? 'http://localhost:3000').replace(/\/$/, '')
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Course',
+    name: course.title,
+    description: course.shortDescription,
+    url: `${site}/cursuri/${course.slug}`,
+    image: new URL(course.coverImage, site).toString(),
+    inLanguage: 'ro',
+    provider: { '@type': 'Organization', name: 'GJ Nail Academy', url: site },
+    offers: {
+      '@type': 'Offer',
+      category: 'Paid',
+      price: course.priceMdl,
+      priceCurrency: 'MDL',
+      url: `${site}/cursuri/${course.slug}`,
+    },
+    hasCourseInstance: {
+      '@type': 'CourseInstance',
+      courseMode: 'Online',
+      courseWorkload: `PT${Math.max(1, Math.round(course.totalSeconds / 60))}M`,
+    },
+  }
 
   return (
     <div className="min-h-screen bg-ivory pb-20 lg:pb-0">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, '\\u003c') }}
+      />
       <HomeHeader />
 
       <main>
@@ -59,42 +98,41 @@ export default async function CoursePage({ params }: Params) {
                 <span className="text-ivory/80">{course.title}</span>
               </nav>
 
-              <p className="mt-6 text-[11px] font-medium uppercase tracking-[0.3em] text-champagne-light">
-                {course.category}
-              </p>
-              <h1 className="mt-3 pb-1 font-display text-[44px] leading-[1.02] font-normal text-gold-metal sm:text-[56px] lg:text-[64px]">
+              <p className="mt-6 text-[14px] text-champagne-light/80">{course.category}</p>
+              <h1 className="mt-3 font-display text-[46px] leading-[1] font-light tracking-[-0.015em] text-balance sm:text-[58px] lg:text-[70px]">
                 {course.title}
               </h1>
-              <p className="mt-5 max-w-[34rem] text-[16px] leading-[1.65] text-ivory/80">
+              <p className="mt-5 max-w-[34rem] text-[16px] leading-[1.65] text-ivory/70">
                 {course.shortDescription}
               </p>
 
-              <dl className="mt-8 grid grid-cols-2 border-y border-ivory/10 sm:grid-cols-4">
-                {facts.map(({ icon: Icon, label, value }, i) => (
+              <dl className="mt-8 grid grid-cols-2 border-y border-champagne/20 sm:grid-cols-4">
+                {facts.map(({ icon: Icon, label, value, mono }, i) => (
                   <div
                     key={label}
-                    className={`py-4 ${i % 2 === 1 ? 'pl-4 sm:pl-0' : ''} ${i > 0 ? 'sm:border-l sm:border-ivory/10 sm:pl-4' : ''} ${i >= 2 ? 'border-t border-ivory/10 sm:border-t-0' : ''}`}
+                    className={`py-4 ${i % 2 === 1 ? 'pl-4 sm:pl-0' : ''} ${i > 0 ? 'sm:border-l sm:border-champagne/20 sm:pl-4' : ''} ${i >= 2 ? 'border-t border-champagne/20 sm:border-t-0' : ''}`}
                   >
-                    <dt className="flex items-center gap-2 text-[11px] uppercase tracking-[0.14em] text-ivory/50">
+                    <dt className="flex items-center gap-2 text-[13px] text-ivory/50">
                       <Icon className="size-3.5 text-champagne" strokeWidth={1.5} aria-hidden="true" />
                       {label}
                     </dt>
-                    <dd className="mt-1.5 text-[15px] text-ivory">{value}</dd>
+                    <dd className={`mt-1.5 text-ivory ${mono ? 'font-mono text-[14px]' : 'text-[15px]'}`}>{value}</dd>
                   </div>
                 ))}
               </dl>
 
               <div className="mt-8 flex flex-col gap-5 sm:flex-row sm:items-center sm:gap-8">
-                <p className="font-display text-[40px] leading-none text-ivory">{price}</p>
-                <ButtonLink href={buyHref} className="h-[52px] px-10">
-                  Cumpără cursul
+                {!mine && <p className="font-mono text-[30px] leading-none text-ivory">{price}</p>}
+                <ButtonLink href={cta.href} className="h-[52px] px-10">
+                  {cta.label}
                 </ButtonLink>
               </div>
-              <p className="mt-4 text-[12px] text-ivory/45">Plată securizată cu cardul. Acces imediat după plată.</p>
+              <p className="mt-4 text-[12px] text-ivory/45">
+                {mine ? 'Ai acces la acest curs.' : 'Plată securizată cu cardul. Acces imediat după plată.'}
+              </p>
             </div>
 
             <div className="relative order-1 lg:order-2">
-              <div aria-hidden="true" className="absolute -inset-3 hidden border border-champagne/30 lg:block" />
               <div className="relative aspect-[4/3] overflow-hidden bg-ink-soft lg:aspect-[4/5]">
                 <Image
                   src={course.coverImage}
@@ -113,14 +151,16 @@ export default async function CoursePage({ params }: Params) {
         <section className="py-16 lg:py-24">
           <div className={`${container} grid gap-10 lg:grid-cols-[1fr_1.3fr] lg:gap-20`}>
             <div>
-              <SectionTitle className="text-left">Ce vei învăța</SectionTitle>
+              <SectionTitle>
+                Ce vei <em>învăța</em>
+              </SectionTitle>
               {course.longDescription && (
                 <p className="mt-6 text-[15px] leading-[1.75] text-stone">{course.longDescription}</p>
               )}
             </div>
             <ul className="grid gap-x-8 gap-y-5 sm:grid-cols-2">
               {course.whatYouLearn.map((item) => (
-                <li key={item} className="flex gap-3 border-b border-line/50 pb-5 text-[15px] leading-[1.55] text-ink">
+                <li key={item} className="flex gap-3 border-b border-champagne/20 pb-5 text-[15px] leading-[1.55] text-ink">
                   <Check className="mt-0.5 size-5 shrink-0 text-bronze" strokeWidth={1.5} aria-hidden="true" />
                   {item}
                 </li>
@@ -131,28 +171,31 @@ export default async function CoursePage({ params }: Params) {
 
         {/* 3. Programa */}
         <section className="bg-sand py-16 lg:py-24">
-          <div className={`${container} max-w-[880px]`}>
-            <SectionTitle>Programa cursului</SectionTitle>
-            <p className="mt-4 text-center text-[14px] text-stone">
-              {lessonsLabel(course.lessons.length)} · {formatDuration(course.totalSeconds)} de video
-            </p>
+          <div className={`${container} grid gap-10 lg:grid-cols-12 lg:gap-8`}>
+            <div className="lg:col-span-4">
+              <SectionTitle>
+                Programa <em>cursului</em>
+              </SectionTitle>
+              <p className="mt-5 flex gap-6 font-mono text-[13px] text-stone">
+                <span>{lessonsLabel(course.lessons.length)}</span>
+                <span>{formatDuration(course.totalSeconds)} video</span>
+              </p>
+            </div>
 
-            <ol className="mt-10 border-t border-line">
+            <ol className="border-t border-champagne/20 lg:col-span-8">
               {course.lessons.map((lesson, i) => (
-                <li key={lesson.id} className="flex items-center gap-4 border-b border-line py-5 sm:gap-6">
-                  <span className="w-7 shrink-0 font-display text-[22px] text-bronze">
+                <li key={lesson.id} className="flex items-center gap-4 border-b border-champagne/20 py-5 sm:gap-6">
+                  <span className="w-7 shrink-0 font-mono text-[13px] text-bronze">
                     {String(i + 1).padStart(2, '0')}
                   </span>
                   <span className="flex-1 text-[15px] leading-snug text-ink sm:text-[16px]">
                     {lesson.title}
                     {lesson.isFreePreview && (
-                      <span className="mt-1.5 block w-fit bg-ink px-2 py-0.5 sm:mt-0 sm:ml-3 sm:inline-block sm:align-middle text-[10px] font-medium uppercase tracking-[0.14em] text-champagne-light">
-                        Probă gratuită
-                      </span>
+                      <Badge className="mt-1.5 flex w-fit sm:mt-0 sm:ml-3 sm:inline-flex sm:align-middle">Probă gratuită</Badge>
                     )}
                   </span>
-                  <span className="shrink-0 text-[13px] text-stone">{formatDuration(lesson.durationSeconds)}</span>
-                  {!lesson.isFreePreview && (
+                  <span className="shrink-0 font-mono text-[12px] text-stone">{formatDuration(lesson.durationSeconds)}</span>
+                  {!lesson.isFreePreview && !mine && (
                     <Lock className="size-4 shrink-0 text-stone/50" strokeWidth={1.5} aria-label="Disponibilă după cumpărare" />
                   )}
                 </li>
@@ -170,10 +213,9 @@ export default async function CoursePage({ params }: Params) {
             ]
               .filter((block) => block.items.length > 0)
               .map((block) => (
-                <div key={block.title} className="border border-line p-7 sm:p-10">
-                  <h2 className="font-display text-[28px] uppercase tracking-[0.03em] text-ink">{block.title}</h2>
-                  <span aria-hidden="true" className="mt-4 block h-px w-12 bg-gold-metal" />
-                  <ul className="mt-6 space-y-3.5">
+                <div key={block.title} className="border border-champagne/20 p-7 sm:p-10">
+                  <h2 className="font-display text-[32px] leading-tight font-light text-ink">{block.title}</h2>
+                  <ul className="mt-6 space-y-3.5 border-t border-champagne/20 pt-6">
                     {block.items.map((item) => (
                       <li key={item} className="flex gap-3 text-[15px] leading-[1.55] text-stone">
                         <span aria-hidden="true" className="mt-[9px] size-1.5 shrink-0 rotate-45 bg-champagne" />
@@ -194,14 +236,14 @@ export default async function CoursePage({ params }: Params) {
           <div className={`${container} grid gap-12 md:grid-cols-2 md:gap-16`}>
             <div>
               <Award className="size-9 text-champagne" strokeWidth={1} aria-hidden="true" />
-              <h2 className="mt-5 font-display text-[32px] leading-tight text-ivory">Certificat de absolvire</h2>
+              <h2 className="mt-5 font-display text-[34px] leading-tight font-light text-ivory">Certificat de absolvire</h2>
               <p className="mt-4 text-[15px] leading-[1.7] text-ivory/70">
                 După ce marchezi toate lecțiile ca terminate, descarci din cont un certificat PDF cu numele
                 tău, titlul cursului, data finalizării și un cod unic.
               </p>
             </div>
-            <div className="md:border-l md:border-ivory/10 md:pl-16">
-              <h2 className="font-display text-[32px] leading-tight text-ivory">Rambursare</h2>
+            <div className="md:border-l md:border-champagne/15 md:pl-16">
+              <h2 className="font-display text-[34px] leading-tight font-light text-ivory">Rambursare</h2>
               <p className="mt-4 text-[15px] leading-[1.7] text-ivory/70">
                 Condițiile în care îți poți recupera banii sunt descrise în politica de rambursare.
                 Citește-o înainte de cumpărare.
@@ -216,15 +258,19 @@ export default async function CoursePage({ params }: Params) {
           </div>
 
           {/* 10. Apel final */}
-          <div className={`${container} mt-16 border-t border-ivory/10 pt-14 text-center lg:mt-20`}>
-            <p className="font-display text-[34px] leading-tight text-gold-metal sm:text-[42px]">
-              Începe {course.title}
-            </p>
-            <p className="mt-3 text-[15px] text-ivory/70">
-              {lessonsLabel(course.lessons.length)} · {formatDuration(course.totalSeconds)} · {price}
-            </p>
-            <ButtonLink href={buyHref} className="mt-8 h-[52px] px-12">
-              Cumpără cursul
+          <div className={`${container} mt-16 flex flex-col gap-8 border-t border-champagne/15 pt-14 lg:mt-20 lg:flex-row lg:items-end lg:justify-between`}>
+            <div>
+              <p className="font-display text-[38px] leading-[1.05] font-light text-ivory sm:text-[48px]">
+                Începe <em className="text-champagne italic">{course.title}</em>
+              </p>
+              <p className="mt-4 flex flex-wrap gap-x-6 gap-y-1 font-mono text-[13px] text-ivory/60">
+                <span>{lessonsLabel(course.lessons.length)}</span>
+                <span>{formatDuration(course.totalSeconds)}</span>
+                {!mine && <span className="text-ivory">{price}</span>}
+              </p>
+            </div>
+            <ButtonLink href={cta.href} className="h-[52px] self-start px-12 lg:self-auto">
+              {cta.label}
             </ButtonLink>
           </div>
         </section>
@@ -232,14 +278,14 @@ export default async function CoursePage({ params }: Params) {
 
       <HomeFooter />
 
-      {/* Pe telefon, butonul de cumpărare rămâne fix jos */}
-      <div className="fixed inset-x-0 bottom-0 z-30 flex items-center justify-between gap-4 border-t border-ivory/10 bg-ink/95 px-5 py-3 backdrop-blur lg:hidden">
+      {/* Pe telefon, butonul principal rămâne fix jos */}
+      <div className="fixed inset-x-0 bottom-0 z-30 flex items-center justify-between gap-4 border-t border-champagne/20 bg-ink/95 px-5 py-3 backdrop-blur lg:hidden">
         <div className="min-w-0">
           <p className="truncate text-[12px] text-ivory/60">{course.title}</p>
-          <p className="font-display text-[22px] leading-tight text-ivory">{price}</p>
+          <p className="font-mono text-[17px] leading-tight text-ivory">{mine ? 'Ai acces' : price}</p>
         </div>
-        <ButtonLink href={buyHref} className="h-11 shrink-0 px-6">
-          Cumpără cursul
+        <ButtonLink href={cta.href} className="h-11 shrink-0 px-6">
+          {cta.label}
         </ButtonLink>
       </div>
     </div>

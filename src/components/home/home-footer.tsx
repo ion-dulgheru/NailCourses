@@ -116,7 +116,7 @@ export async function HomeFooter() {
             </ul>
             <ul aria-label="Metode de plată acceptate" className="mt-5 flex flex-wrap gap-1.5">
               {paymentBadges.map((b) => (
-                <li key={b} className="border border-ivory/25 px-2 py-0.5 text-[10px] font-medium uppercase tracking-[0.12em] text-ivory/70">
+                <li key={b} className="border border-champagne/20 px-2 py-0.5 text-[12px] text-ivory/70">
                   {b}
                 </li>
               ))}
@@ -124,7 +124,7 @@ export async function HomeFooter() {
           </div>
         </div>
 
-        <div className="mt-12 flex flex-col gap-1 border-t border-ivory/15 pt-5 text-[11px] text-ivory/50 sm:flex-row sm:justify-between">
+        <div className="mt-12 flex flex-col gap-1 border-t border-champagne/15 pt-5 text-[11px] text-ivory/50 sm:flex-row sm:justify-between">
           <p>© {new Date().getFullYear()} GJ Nail Academy. Toate drepturile rezervate.</p>
           <p>{company.length > 0 ? company.join(' · ') : 'Academia online a GJ Nail Studio'}</p>
         </div>

@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { HomeHeader } from '@/components/home/home-header'
 import { HomeFooter } from '@/components/home/home-footer'
 import { container } from '@/components/home/primitives'
-import { CourseCard } from '@/components/courses/course-card'
+import { CourseIndex } from '@/components/courses/course-index'
 import { LEVELS, getPublishedCourses, parseLevel } from '@/lib/courses'
 import { cn } from '@/lib/utils'
 
@@ -28,25 +28,22 @@ export default async function CatalogPage({
       <HomeHeader />
 
       <main>
-        <section className="bg-ink pt-32 pb-14 text-center text-ivory lg:pt-40 lg:pb-20">
-          <div className={container}>
-            <p className="text-[11px] font-medium uppercase tracking-[0.32em] text-champagne-light">
-              Catalog
-            </p>
-            <h1 className="mt-4 pb-1 font-display text-[44px] leading-[1.05] font-normal text-gold-metal sm:text-[56px] lg:text-[64px]">
-              Cursurile noastre
+        <section className="bg-ink pt-32 pb-14 text-ivory lg:pt-44 lg:pb-20">
+          <div className={`${container} grid gap-6 lg:grid-cols-12 lg:items-end lg:gap-8`}>
+            <h1 className="font-display text-[48px] leading-[0.98] font-light tracking-[-0.015em] sm:text-[62px] lg:col-span-7 lg:text-[76px]">
+              Cursurile <em className="text-champagne italic">noastre</em>
             </h1>
-            <p className="mx-auto mt-5 max-w-[34rem] text-[15px] leading-[1.65] text-ivory/75 sm:text-[16px]">
+            <p className="max-w-[30rem] text-[15px] leading-[1.65] text-ivory/65 sm:text-[16px] lg:col-span-5">
               Alege nivelul potrivit și învață în ritmul tău, de pe telefon sau calculator, cu
               lecții video explicate pas cu pas.
             </p>
           </div>
         </section>
 
-        <section className="pt-10 pb-16 lg:pt-14 lg:pb-24">
+        <section className="pt-10 pb-16 lg:pt-14 lg:pb-28">
           <div className={container}>
-            <nav aria-label="Filtrează după nivel" className="flex justify-center">
-              <ul className="flex flex-wrap justify-center gap-2 sm:gap-3">
+            <nav aria-label="Filtrează după nivel">
+              <ul className="flex flex-wrap gap-x-7 gap-y-2">
                 {filters.map((f) => {
                   const active = f.param === undefined ? !level : parseLevel(f.param) === level
                   return (
@@ -56,10 +53,10 @@ export default async function CatalogPage({
                         aria-current={active ? 'page' : undefined}
                         scroll={false}
                         className={cn(
-                          'inline-flex h-10 items-center border px-5 text-[12px] font-medium uppercase tracking-[0.14em] transition-colors',
+                          'inline-flex h-10 items-center border-b text-[15px] transition-colors',
                           active
-                            ? 'border-ink bg-ink text-ivory'
-                            : 'border-line text-stone hover:border-ink hover:text-ink',
+                            ? 'border-champagne text-ink'
+                            : 'border-transparent text-stone hover:text-ink',
                         )}
                       >
                         {f.label}
@@ -71,15 +68,11 @@ export default async function CatalogPage({
             </nav>
 
             {courses.length > 0 ? (
-              <ul className="mt-10 grid gap-x-8 gap-y-14 sm:grid-cols-2 lg:mt-14 lg:grid-cols-3">
-                {courses.map((course) => (
-                  <li key={course.id}>
-                    <CourseCard course={course} />
-                  </li>
-                ))}
-              </ul>
+              <div className="mt-8 lg:mt-10">
+                <CourseIndex courses={courses} wide />
+              </div>
             ) : (
-              <div className="mx-auto mt-14 max-w-md text-center">
+              <div className="mt-8 max-w-md border-t border-champagne/20 pt-10">
                 <p className="font-display text-[26px] text-ink">Încă nu avem cursuri la acest nivel.</p>
                 <p className="mt-3 text-[15px] text-stone">
                   Revino curând sau{' '}

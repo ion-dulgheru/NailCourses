@@ -26,8 +26,8 @@ export default async function CertificatesPage() {
       <main>
         <section className="bg-ink pt-32 pb-12 text-ivory lg:pt-40 lg:pb-16">
           <div className={container}>
-            <p className="text-[11px] font-medium uppercase tracking-[0.32em] text-champagne-light">Contul tău</p>
-            <h1 className="mt-4 pb-1 font-display text-[44px] leading-[1.05] font-normal text-gold-metal sm:text-[56px]">
+            <p className="text-[14px] text-champagne-light/80">Contul tău</p>
+            <h1 className="mt-4 font-display text-[44px] leading-[1] font-light tracking-[-0.015em] sm:text-[56px]">
               Certificatele mele
             </h1>
             <p className="mt-4 max-w-[32rem] text-[15px] leading-[1.65] text-ivory/70">
@@ -39,7 +39,7 @@ export default async function CertificatesPage() {
         <section className="py-12 lg:py-16">
           <div className={container}>
             {certificates.length === 0 ? (
-              <div className="mx-auto max-w-lg border border-line px-6 py-14 text-center">
+              <div className="mx-auto max-w-lg border border-champagne/20 px-6 py-14 text-center">
                 <Award className="mx-auto size-10 text-bronze" strokeWidth={1} aria-hidden="true" />
                 <p className="mt-4 font-display text-[30px] leading-tight text-ink">Încă nu ai certificate</p>
                 <p className="mt-3 text-[15px] leading-[1.6] text-stone">
@@ -53,17 +53,17 @@ export default async function CertificatesPage() {
               <ul className="grid gap-5 md:grid-cols-2">
                 {certificates.map((c) => (
                   <li key={c.id}>
-                    <article className="flex h-full flex-col border border-line p-6 sm:p-8">
+                    <article className="flex h-full flex-col border border-champagne/20 p-6 sm:p-8">
                       <div className="flex items-start gap-4">
                         <Award className="size-9 shrink-0 text-bronze" strokeWidth={1} aria-hidden="true" />
                         <div className="min-w-0">
-                          <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-bronze">
+                          <p className="text-[12px] font-medium text-bronze">
                             Certificat de absolvire
                           </p>
                           <h2 className="mt-1.5 font-display text-[28px] leading-tight text-ink">{c.course.title}</h2>
                         </div>
                       </div>
-                      <dl className="mt-6 grid grid-cols-2 gap-4 border-t border-line/70 pt-5 text-[13px]">
+                      <dl className="mt-6 grid grid-cols-2 gap-4 border-t border-champagne/20 pt-5 text-[13px]">
                         <div>
                           <dt className="text-stone">Emis pe</dt>
                           <dd className="mt-0.5 text-ink">{dateFormat.format(c.issuedAt)}</dd>

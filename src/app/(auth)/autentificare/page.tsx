@@ -13,9 +13,10 @@ export const metadata: Metadata = {
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ callbackUrl?: string }>;
+  searchParams: Promise<{ callbackUrl?: string; parola?: string }>;
 }) {
-  const callbackUrl = safeCallbackUrl((await searchParams).callbackUrl);
+  const params = await searchParams;
+  const callbackUrl = safeCallbackUrl(params.callbackUrl);
 
   if (await getCurrentUser()) {
     redirect(callbackUrl);
@@ -23,7 +24,7 @@ export default async function LoginPage({
 
   return (
     <AuthShell>
-      <LoginClient callbackUrl={callbackUrl} />
+      <LoginClient callbackUrl={callbackUrl} passwordChanged={params.parola === "noua"} />
     </AuthShell>
   );
 }

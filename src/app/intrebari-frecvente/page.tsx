@@ -122,7 +122,7 @@ export default function FaqPage() {
         <div className="mx-auto max-w-3xl space-y-14">
           {groups.map((group) => (
             <div key={group.title}>
-              <h2 className="text-[11px] font-medium uppercase tracking-[0.24em] text-bronze">{group.title}</h2>
+              <h2 className="font-display text-[28px] leading-tight font-light text-ink">{group.title}</h2>
               <div className="mt-4 border-t border-line">
                 {group.items.map((item) => (
                   <details key={item.q} className="group border-b border-line">

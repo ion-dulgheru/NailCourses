@@ -8,6 +8,14 @@ import { assertAdmin, slugify } from "@/lib/admin";
 import { Prisma } from "@/generated/prisma/client";
 import { SETTING_FIELDS } from "@/lib/settings";
 import { parseVideoSource } from "@/lib/video";
+import {
+  getSignedUploadUrl,
+  getStorageUsage,
+  isStorageConfigured,
+  MAX_UPLOAD_BYTES,
+  STORAGE_LIMIT_BYTES,
+  videoExists,
+} from "@/lib/storage";
 
 export type AdminFormState = {
   ok: boolean;
@@ -240,6 +248,24 @@ export async function saveBlock(prev: AdminFormState, formData: FormData): Promi
   const parsed = blockSchema.safeParse(values);
   if (!parsed.success) return fieldErrors(parsed.error, values);
 
+  // O greșeală de scriere în numele fișierului s-ar vedea abia la elevă; o prindem la salvare.
+  // Doar când numele se schimbă, ca adminul să poată edita legenda înainte să urce fișierul.
+  if (parsed.data.type === "video") {
+    const source = parseVideoSource(parsed.data.videoKey);
+    const current = blockId
+      ? await prisma.lessonBlock.findUnique({ where: { id: blockId }, select: { videoKey: true } })
+      : null;
+    const changed = current?.videoKey?.trim() !== parsed.data.videoKey;
+    if (source?.kind === "fisier" && changed && (await videoExists(source.key)) === false) {
+      return {
+        ok: false,
+        message: "Verifică câmpurile marcate.",
+        errors: { videoKey: `Fișierul „${source.key}” nu există în spațiul de stocare. Urcă-l întâi în R2 sau verifică numele.` },
+        values,
+      };
+    }
+  }
+
   const data = {
     type: parsed.data.type,
     text: parsed.data.text,
@@ -255,6 +281,57 @@ export async function saveBlock(prev: AdminFormState, formData: FormData): Promi
 
   refresh();
   return { ok: true, message: blockId ? "Blocul a fost salvat." : "Blocul a fost adăugat." };
+}
+
+// ─── Încărcarea videoclipurilor în R2 ───────────────────────────────────────
+
+const VIDEO_TYPES: Record<string, string> = { "video/mp4": "mp4", "video/webm": "webm", "video/quicktime": "mov" };
+
+export type VideoUploadResult = { ok: true; url: string; key: string } | { ok: false; message: string };
+
+// Emite linkul de încărcare doar dacă fișierul încape în limita de 10 GB a spațiului de stocare.
+// Fișierul urcă direct din browser în R2 (nu prin server), apoi cheia se pune în blocul video.
+export async function requestVideoUpload(input: {
+  lessonId: string;
+  fileName: string;
+  size: number;
+  contentType: string;
+}): Promise<VideoUploadResult> {
+  await assertAdmin();
+  if (!isStorageConfigured()) return { ok: false, message: "Spațiul de stocare video nu este conectat." };
+
+  const ext = VIDEO_TYPES[input.contentType];
+  if (!ext) return { ok: false, message: "Alege un fișier video MP4, WebM sau MOV." };
+  if (!Number.isSafeInteger(input.size) || input.size <= 0) return { ok: false, message: "Fișierul este gol." };
+  if (input.size > MAX_UPLOAD_BYTES) {
+    return { ok: false, message: "Fișierul depășește 5 GB. Micșorează-l (export la 1080p) și încearcă din nou." };
+  }
+
+  const lesson = await prisma.lesson.findUnique({
+    where: { id: input.lessonId },
+    select: { course: { select: { slug: true } } },
+  });
+  if (!lesson) return { ok: false, message: "Lecția nu mai există." };
+
+  const used = await getStorageUsage();
+  if (used + input.size > STORAGE_LIMIT_BYTES) {
+    return {
+      ok: false,
+      message: "Nu poți adăuga video: spațiul de stocare de 10 GB este plin. Contactează creatorul site-ului.",
+    };
+  }
+
+  // Nume curat și unic, ca un fișier nou să nu-l suprascrie pe altul cu același nume.
+  const base = slugify(input.fileName.replace(/\.[^.]+$/, "")) || "video";
+  let key = `cursuri/${lesson.course.slug}/${base}.${ext}`;
+  for (let i = 2; ; i++) {
+    const exists = await videoExists(key);
+    if (exists === false) break;
+    if (exists === null || i > 50) return { ok: false, message: "Nu am putut pregăti încărcarea. Încearcă din nou." };
+    key = `cursuri/${lesson.course.slug}/${base}-${i}.${ext}`;
+  }
+
+  return { ok: true, url: await getSignedUploadUrl(key, input.contentType, input.size), key };
 }
 
 export async function deleteBlock(blockId: string) {

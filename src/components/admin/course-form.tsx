@@ -56,7 +56,7 @@ export function CourseForm({ course, images }: { course?: CourseFormData; images
             error={err('slug')}
           >
             <div className="flex">
-              <span className="flex items-center border border-r-0 border-line bg-sand px-3 text-[13px] text-stone">
+              <span className="flex items-center border border-r-0 border-champagne/20 bg-sand px-3 text-[13px] text-stone">
                 /cursuri/
               </span>
               <input id="slug" name="slug" defaultValue={value('slug')} placeholder="bazele-manichiurii" className={adminInput} {...invalid('slug')} />
@@ -120,7 +120,7 @@ export function CourseForm({ course, images }: { course?: CourseFormData; images
 
       <AdminCard title="Imagine de copertă" description="Imaginile disponibile sunt cele din folderul public/images.">
         <div className="grid gap-5 sm:grid-cols-[160px_1fr]">
-          <div className="relative aspect-[11/10] overflow-hidden border border-line bg-sand">
+          <div className="relative aspect-[11/10] overflow-hidden border border-champagne/20 bg-sand">
             {cover && <Image src={cover} alt="" fill sizes="160px" className="object-cover" />}
           </div>
           <div className="space-y-5">
@@ -182,7 +182,7 @@ export function CourseForm({ course, images }: { course?: CourseFormData; images
         </fieldset>
       </AdminCard>
 
-      <div className="sticky bottom-0 -mx-5 flex flex-col gap-3 border-t border-line bg-sand/95 px-5 py-4 backdrop-blur sm:mx-0 sm:flex-row sm:items-center sm:justify-between sm:px-0">
+      <div className="sticky bottom-0 -mx-5 flex flex-col gap-3 border-t border-champagne/20 bg-sand/95 px-5 py-4 backdrop-blur sm:mx-0 sm:flex-row sm:items-center sm:justify-between sm:px-0">
         <div className="min-h-[1px] flex-1">
           <FormMessage state={state} />
         </div>

@@ -8,7 +8,7 @@ export function DownloadCertificate({ code, className }: { code: string; classNa
       href={`/api/certificat/${code}`}
       download={`certificat-${code}.pdf`}
       className={cn(
-        'inline-flex h-11 items-center justify-center gap-2 bg-gold-metal px-6 text-[12px] font-medium uppercase tracking-[0.14em] text-ink shadow-[inset_0_1px_0_rgba(255,255,255,0.35)] transition hover:brightness-110',
+        'inline-flex h-11 items-center justify-center gap-2 bg-champagne px-6 text-[14px] font-medium text-ink shadow-[inset_0_1px_0_rgba(255,255,255,0.35)] transition hover:brightness-110',
         className,
       )}
     >

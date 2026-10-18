@@ -49,7 +49,7 @@ export function MobileMenu({
           className="fixed inset-0 z-50 flex flex-col bg-ink px-5 pb-10 text-ivory sm:px-8"
         >
           <div className="flex h-20 items-center justify-between">
-            <span className="text-[11px] uppercase tracking-[0.3em] text-ivory/50">Meniu</span>
+            <span className="text-[13px] text-ivory/50">Meniu</span>
             <button
               type="button"
               onClick={close}
@@ -61,9 +61,9 @@ export function MobileMenu({
           </div>
 
           <nav aria-label="Navigație mobilă" className="mt-10 flex-1">
-            <ul className="border-t border-ivory/10">
+            <ul className="border-t border-champagne/15">
               {links.map((link, i) => (
-                <li key={link.href} className="border-b border-ivory/10">
+                <li key={link.href} className="border-b border-champagne/15">
                   <Link
                     href={link.href}
                     onClick={close}
@@ -80,7 +80,7 @@ export function MobileMenu({
             {user ? (
               <div className="mt-10">
                 <div className="flex items-center gap-3">
-                  <span className="flex size-10 items-center justify-center rounded-full bg-gold-metal text-[13px] font-semibold text-ink">
+                  <span className="flex size-10 items-center justify-center rounded-full bg-champagne text-[13px] font-semibold text-ink">
                     {initials(user.name) || '•'}
                   </span>
                   <div className="min-w-0">
@@ -128,7 +128,7 @@ export function MobileMenu({
           <Link
             href="/cursuri"
             onClick={close}
-            className="flex h-14 items-center justify-center bg-champagne text-[11px] font-medium uppercase tracking-[0.22em] text-ink"
+            className="flex h-14 items-center justify-center bg-champagne text-[15px] font-medium text-ink"
           >
             Vezi cursurile
           </Link>

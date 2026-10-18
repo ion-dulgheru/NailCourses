@@ -3,6 +3,8 @@ import { cn } from '@/lib/utils'
 
 export const container = 'mx-auto w-full max-w-[1200px] px-5 sm:px-8 lg:px-10'
 
+// Titlurile de secțiune: Cormorant subțire, aliniat la stânga, în propoziție.
+// Un singur cuvânt-cheie poate fi pus în <em> — apare italic, în auriu plin.
 export function SectionTitle({
   children,
   className,
@@ -20,8 +22,8 @@ export function SectionTitle({
     <Tag
       id={id}
       className={cn(
-        'text-center font-display text-[28px] leading-[1.15] font-normal uppercase tracking-[0.03em] sm:text-[36px] lg:text-[42px]',
-        tone === 'dark' ? 'text-ink' : 'text-ivory',
+        'font-display text-[36px] leading-[1.02] font-light tracking-[-0.01em] text-balance sm:text-[46px] lg:text-[56px] [&_em]:italic',
+        tone === 'dark' ? 'text-ink [&_em]:text-bronze' : 'text-ivory [&_em]:text-champagne',
         className,
       )}
     >
@@ -31,14 +33,15 @@ export function SectionTitle({
 }
 
 const buttonBase =
-  'inline-flex h-11 items-center justify-center px-7 text-[12px] font-medium uppercase tracking-[0.14em] transition-colors duration-300 focus-visible:outline-2 focus-visible:outline-offset-4'
+  'inline-flex h-12 items-center justify-center px-7 text-[14px] font-medium transition-colors duration-300 focus-visible:outline-2 focus-visible:outline-offset-4'
 
+// Auriul plin e rezervat butonului principal; restul butoanelor sunt contururi discrete.
 const buttonVariants = {
-  gold: 'bg-gold-metal text-ink shadow-[inset_0_1px_0_rgba(255,255,255,0.35)] hover:brightness-110 focus-visible:outline-champagne',
+  gold: 'bg-champagne text-ink hover:bg-champagne-light focus-visible:outline-champagne',
   'outline-dark':
-    'border border-ink/70 text-ink normal-case tracking-normal text-[14px] font-normal hover:bg-ink hover:text-ivory focus-visible:outline-ink',
+    'border border-ink/20 font-normal text-ink hover:border-ink focus-visible:outline-ink',
   'outline-light':
-    'border border-ivory/80 text-ivory normal-case tracking-normal text-[14px] font-normal hover:bg-ivory hover:text-ink focus-visible:outline-ivory',
+    'border border-ivory/25 font-normal text-ivory hover:border-ivory focus-visible:outline-ivory',
 }
 
 export function ButtonLink({
@@ -56,6 +59,20 @@ export function ButtonLink({
     <Link href={href} className={cn(buttonBase, buttonVariants[variant], className)}>
       {children}
     </Link>
+  )
+}
+
+// Etichetă mică în auriu plin (nivelul cursului, „Probă gratuită”).
+export function Badge({ children, className }: { children: React.ReactNode; className?: string }) {
+  return (
+    <span
+      className={cn(
+        'inline-flex h-6 items-center bg-champagne px-2 text-[12px] leading-none font-medium text-ink',
+        className,
+      )}
+    >
+      {children}
+    </span>
   )
 }
 

@@ -13,7 +13,13 @@ import {
   linkClass,
 } from "@/components/auth/form-parts";
 
-export default function LoginClient({ callbackUrl }: { callbackUrl: string }) {
+export default function LoginClient({
+  callbackUrl,
+  passwordChanged = false,
+}: {
+  callbackUrl: string;
+  passwordChanged?: boolean;
+}) {
   const [data, action] = useActionState(signInWithCredentials, {
     success: false,
     message: "",
@@ -33,6 +39,12 @@ export default function LoginClient({ callbackUrl }: { callbackUrl: string }) {
       <form action={action} className="mt-9 space-y-6">
         <input type="hidden" name="callbackUrl" value={callbackUrl} />
 
+        {passwordChanged && !data.message && (
+          <p role="status" className="border border-champagne/30 px-4 py-3 text-[14px] text-ivory/85">
+            Parola a fost schimbată. Intră în cont cu parola nouă.
+          </p>
+        )}
+
         <FormError message={data.success ? undefined : data.message} />
 
         <Field id="email" label="Email">
@@ -50,6 +62,11 @@ export default function LoginClient({ callbackUrl }: { callbackUrl: string }) {
 
         <Field id="password" label="Parolă">
           <PasswordInput id="password" autoComplete="current-password" />
+          <p className="mt-3 text-right text-[13px]">
+            <Link href="/parola-uitata" className={linkClass}>
+              Ai uitat parola?
+            </Link>
+          </p>
         </Field>
 
         <div className="pt-2">
@@ -57,11 +74,11 @@ export default function LoginClient({ callbackUrl }: { callbackUrl: string }) {
         </div>
       </form>
 
-      <div className="mt-10 border-t border-ivory/10 pt-8 text-center">
+      <div className="mt-10 border-t border-champagne/15 pt-8">
         <p className="text-[14px] text-ivory/60">Nu ai încă un cont?</p>
         <Link
           href={registerHref}
-          className="mt-4 inline-flex h-11 w-full items-center justify-center border border-ivory/25 text-[12px] font-medium uppercase tracking-[0.18em] text-ivory transition-colors hover:border-champagne hover:text-champagne-light focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-champagne"
+          className="mt-4 inline-flex h-12 w-full items-center justify-center border border-ivory/25 text-[15px] text-ivory transition-colors hover:border-ivory focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-champagne"
         >
           Creează cont
         </Link>

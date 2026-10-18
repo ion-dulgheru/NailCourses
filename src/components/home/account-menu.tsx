@@ -68,7 +68,7 @@ export function AccountMenu({ user }: { user: HeaderUser }) {
         aria-controls="meniu-cont"
         className="group flex items-center gap-2 text-ivory"
       >
-        <span className="flex size-9 items-center justify-center rounded-full bg-gold-metal text-[12px] font-semibold tracking-wide text-ink">
+        <span className="flex size-9 items-center justify-center rounded-full bg-champagne text-[12px] font-semibold tracking-wide text-ink">
           {initials(user.name) || '•'}
         </span>
         <span className="sr-only">Meniul contului</span>
@@ -83,9 +83,9 @@ export function AccountMenu({ user }: { user: HeaderUser }) {
         <div
           id="meniu-cont"
           role="menu"
-          className="absolute top-full right-0 mt-3 w-64 border border-ivory/10 bg-ink py-2 text-ivory shadow-[0_20px_50px_-20px_rgba(0,0,0,0.8)]"
+          className="absolute top-full right-0 mt-3 w-64 border border-champagne/15 bg-ink py-2 text-ivory shadow-[0_20px_50px_-20px_rgba(0,0,0,0.8)]"
         >
-          <div className="border-b border-ivory/10 px-5 pt-2 pb-4">
+          <div className="border-b border-champagne/15 px-5 pt-2 pb-4">
             <p className="truncate font-display text-[20px] leading-tight">{user.name}</p>
             <p className="mt-1 truncate text-[12px] text-ivory/50">{user.email}</p>
           </div>
@@ -103,7 +103,7 @@ export function AccountMenu({ user }: { user: HeaderUser }) {
               </li>
             ))}
           </ul>
-          <div className="border-t border-ivory/10 pt-2">
+          <div className="border-t border-champagne/15 pt-2">
             <SignOutButton className="flex w-full items-center gap-2.5 px-5 py-2.5 text-left text-[14px] text-ivory/60 transition-colors hover:bg-ivory/5 hover:text-ivory" />
           </div>
         </div>

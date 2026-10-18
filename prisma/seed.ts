@@ -4,6 +4,7 @@
 import "dotenv/config";
 import { prisma } from "../src/lib/db";
 import type { CourseLevel } from "../src/generated/prisma/client";
+import { lessonContent } from "./seed-content";
 
 type SeedLesson = { slug: string; title: string; minutes: number; free?: boolean };
 
@@ -132,7 +133,26 @@ const courses: SeedCourse[] = [
   },
 ];
 
+// Datele de pe site (subsol, contact, certificat). Se creează doar dacă lipsesc — nu suprascriu setările din admin.
+const settings: Record<string, string> = {
+  firma_denumire: "GJ Nail Studio SRL",
+  firma_idno: "", // se completează din admin cu IDNO-ul real
+  firma_adresa: "or. Ialoveni, str. Alexandru cel Bun 12, Republica Moldova",
+  firma_telefon: "+373 60 206 061",
+  contact_email: "contact@gjnailstudio.md",
+  instagram_url: "https://www.instagram.com/gjnailstudio",
+  facebook_url: "",
+  tiktok_url: "",
+  certificat_semnatura: "Fondatoarea GJ Nail Studio",
+  certificat_text: "a absolvit cu succes cursul",
+};
+
 async function main() {
+  for (const [key, value] of Object.entries(settings)) {
+    await prisma.setting.upsert({ where: { key }, create: { key, value }, update: {} });
+  }
+  console.log(`✓ Setări: ${Object.keys(settings).length} chei`);
+
   for (const [index, { lessons, ...course }] of courses.entries()) {
     const data = { ...course, status: "publicat" as const, position: index };
     const saved = await prisma.course.upsert({
@@ -142,16 +162,32 @@ async function main() {
     });
 
     for (const [position, lesson] of lessons.entries()) {
+      const content = lessonContent[`${course.slug}/${lesson.slug}`];
       const lessonData = {
         title: lesson.title,
+        description: content?.description ?? "",
         position,
         durationSeconds: lesson.minutes * 60,
         isFreePreview: lesson.free ?? false,
       };
-      await prisma.lesson.upsert({
+      const savedLesson = await prisma.lesson.upsert({
         where: { courseId_slug: { courseId: saved.id, slug: lesson.slug } },
         create: { ...lessonData, courseId: saved.id, slug: lesson.slug },
         update: lessonData,
+      });
+
+      // Blocurile se creează doar pentru lecțiile goale, ca să nu ștergem ce a compus adminul.
+      const hasBlocks = await prisma.lessonBlock.count({ where: { lessonId: savedLesson.id } });
+      if (!content || hasBlocks) continue;
+      const blocks = [
+        { type: "video" as const, text: "", videoKey: `cursuri/${course.slug}/${lesson.slug}.mp4` },
+        ...content.sections.flatMap((section) => [
+          { type: "titlu" as const, text: section.heading, videoKey: null },
+          ...section.paragraphs.map((text) => ({ type: "text" as const, text, videoKey: null })),
+        ]),
+      ];
+      await prisma.lessonBlock.createMany({
+        data: blocks.map((block, i) => ({ ...block, lessonId: savedLesson.id, position: i })),
       });
     }
     console.log(`✓ ${course.title}: ${lessons.length} lecții`);

@@ -92,7 +92,7 @@ export default async function StudentPage({ params }: Props) {
         {student.enrollments.length === 0 ? (
           <p className="text-[14px] text-stone">Elevul nu are încă acces la niciun curs.</p>
         ) : (
-          <ul className="-my-4 divide-y divide-line/70">
+          <ul className="-my-4 divide-y divide-champagne/20/70">
             {student.enrollments.map((e) => {
               const total = e.course.lessons.length
               const done = e.course.lessons.filter((l) => completed.has(l.id)).length
@@ -116,7 +116,7 @@ export default async function StudentPage({ params }: Props) {
                         aria-valuemax={100}
                         aria-label={`Progres ${e.course.title}`}
                       >
-                        <div className="h-full bg-gold-metal" style={{ width: `${percent}%` }} />
+                        <div className="h-full bg-champagne" style={{ width: `${percent}%` }} />
                       </div>
                       <span className="text-[12px] text-stone">
                         {done} din {total} lecții
@@ -140,7 +140,7 @@ export default async function StudentPage({ params }: Props) {
         {student.orders.length === 0 ? (
           <p className="text-[14px] text-stone">Elevul nu are nicio comandă.</p>
         ) : (
-          <ul className="-my-4 divide-y divide-line/70">
+          <ul className="-my-4 divide-y divide-champagne/20/70">
             {student.orders.map((o) => (
               <li key={o.id} className="flex flex-col gap-3 py-4 sm:flex-row sm:items-center">
                 <div className="min-w-0 flex-1">
@@ -156,7 +156,7 @@ export default async function StudentPage({ params }: Props) {
                   </p>
                 </div>
                 <div className="flex shrink-0 flex-wrap items-center gap-3">
-                  <span className="text-[14px] text-ink">{formatMdl(o.amountMdl)}</span>
+                  <span className="font-mono text-[14px] text-ink">{formatMdl(o.amountMdl)}</span>
                   <OrderStatusBadge status={o.status} />
                   {o.status === 'platita' && <RefundButton orderId={o.id} />}
                 </div>

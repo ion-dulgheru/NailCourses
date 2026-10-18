@@ -57,7 +57,7 @@ export default async function AboutPage() {
         <div className={container}>
           <SectionTitle>Parcurs și formare</SectionTitle>
           {/* TODO: lista reală de diplome și cursuri urmate, de la clientă. */}
-          <p className="mx-auto mt-6 max-w-[36rem] text-center text-[15px] leading-[1.75] text-stone">
+          <p className="mt-6 max-w-[36rem] text-[15px] leading-[1.75] text-stone">
             Diplomele și cursurile de specializare urmate vor fi adăugate aici.
           </p>
         </div>

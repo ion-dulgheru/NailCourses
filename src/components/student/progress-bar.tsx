@@ -23,12 +23,15 @@ export function ProgressBar({
         aria-valuemin={0}
         aria-valuemax={100}
         aria-label={label}
-        className={cn('h-1 w-full overflow-hidden', tone === 'light' ? 'bg-line/50' : 'bg-ivory/15')}
+        className={cn('h-px w-full', tone === 'light' ? 'bg-champagne/25' : 'bg-champagne/20')}
       >
-        <div className="h-full bg-gold-metal transition-[width] duration-500" style={{ width: `${percent}%` }} />
+        <div className="-mt-px h-[3px] bg-champagne transition-[width] duration-500" style={{ width: `${percent}%` }} />
       </div>
-      <p className={cn('mt-2 text-[12px]', tone === 'light' ? 'text-stone' : 'text-ivory/60')}>
-        {done} din {total} lecții · {percent}%
+      <p className={cn('mt-2.5 flex justify-between font-mono text-[12px]', tone === 'light' ? 'text-stone' : 'text-ivory/60')}>
+        <span>
+          {done}/{total} lecții
+        </span>
+        <span>{percent}%</span>
       </p>
     </div>
   )

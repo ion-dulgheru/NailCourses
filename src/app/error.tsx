@@ -11,18 +11,20 @@ export default function Error({ error, retry }: { error: Error & { digest?: stri
   }, [error])
 
   return (
-    <main className="flex min-h-svh flex-col items-center justify-center bg-ink px-5 text-center text-ivory">
+    <main className="flex min-h-svh flex-col justify-center bg-ink px-5 text-ivory sm:px-16 lg:px-24">
       <Wordmark />
-      <h1 className="mt-12 font-display text-[40px] leading-[1.05] text-gold-metal sm:text-[52px]">Ceva n-a mers bine</h1>
+      <h1 className="mt-12 font-display text-[44px] leading-[1] font-light sm:text-[60px]">
+        Ceva n-a mers <em className="text-champagne italic">bine</em>
+      </h1>
       <p className="mt-4 max-w-md text-[15px] leading-[1.65] text-ivory/70">
         A apărut o eroare neașteptată. Încearcă din nou; dacă problema continuă, scrie-ne.
       </p>
-      {error.digest && <p className="mt-3 font-mono text-[11px] text-ivory/35">Cod: {error.digest}</p>}
-      <div className="mt-10 flex flex-col items-center gap-5 sm:flex-row">
+      {error.digest && <p className="mt-3 font-mono text-[12px] text-ivory/35">Cod: {error.digest}</p>}
+      <div className="mt-10 flex flex-col items-start gap-5 sm:flex-row sm:items-center">
         <button
           type="button"
           onClick={() => retry()}
-          className="inline-flex h-11 items-center justify-center bg-gold-metal px-7 text-[12px] font-medium uppercase tracking-[0.14em] text-ink transition hover:brightness-110"
+          className="inline-flex h-12 items-center justify-center bg-champagne px-7 text-[14px] font-medium text-ink transition-colors hover:bg-champagne-light"
         >
           Încearcă din nou
         </button>

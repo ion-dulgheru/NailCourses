@@ -22,8 +22,8 @@ export default async function CheckoutFailurePage({ searchParams }: Props) {
 
   return (
     <CheckoutShell eyebrow="Plată" title="Plata nu a reușit">
-      <div className="mx-auto max-w-[560px] text-center">
-        <XCircle className="mx-auto size-12 text-red-700" strokeWidth={1.3} aria-hidden="true" />
+      <div className="max-w-[560px]">
+        <XCircle className="size-10 text-red-700" strokeWidth={1.3} aria-hidden="true" />
         <p className="mt-6 text-[16px] leading-[1.7] text-stone">
           Plata pentru <span className="text-ink">{order.course.title}</span> nu a fost finalizată. Poți încerca
           din nou, eventual cu alt card.
@@ -33,7 +33,7 @@ export default async function CheckoutFailurePage({ searchParams }: Props) {
         </ButtonLink>
         <p className="mt-6 text-[14px] text-stone">
           Problema continuă?{' '}
-          <Link href="/contact" className="text-ink underline underline-offset-4 hover:text-bronze">
+          <Link href="/contact" className="text-ink underline decoration-champagne/50 underline-offset-4 hover:decoration-bronze">
             Scrie-ne
           </Link>
         </p>

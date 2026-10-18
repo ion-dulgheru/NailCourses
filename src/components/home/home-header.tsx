@@ -41,7 +41,7 @@ export async function HomeHeader() {
             </ul>
           </nav>
 
-          <span aria-hidden="true" className="h-5 w-px bg-ivory/20" />
+          <span aria-hidden="true" className="h-5 w-px bg-champagne/20" />
 
           {user ? (
             <div className="flex items-center gap-6">

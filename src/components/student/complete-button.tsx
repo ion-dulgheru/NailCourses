@@ -22,10 +22,10 @@ export function CompleteButton({ lessonId, completed }: { lessonId: string; comp
       disabled={pending}
       aria-pressed={optimistic}
       className={cn(
-        'inline-flex h-12 items-center justify-center gap-2.5 px-6 text-[12px] font-medium uppercase tracking-[0.14em] transition duration-300 disabled:cursor-wait',
+        'inline-flex h-12 items-center justify-center gap-2.5 px-6 text-[14px] font-medium transition duration-300 disabled:cursor-wait',
         optimistic
           ? 'border border-champagne/60 text-champagne-light hover:border-ivory/40 hover:text-ivory'
-          : 'bg-gold-metal text-ink shadow-[inset_0_1px_0_rgba(255,255,255,0.35)] hover:brightness-110',
+          : 'bg-champagne text-ink transition-colors hover:bg-champagne-light',
       )}
     >
       {optimistic ? (

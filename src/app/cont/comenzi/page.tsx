@@ -43,7 +43,7 @@ export default async function OrderHistoryPage() {
               <ArrowLeft className="size-4" strokeWidth={1.5} aria-hidden="true" />
               Contul meu
             </Link>
-            <h1 className="mt-4 pb-1 font-display text-[44px] leading-[1.05] font-normal text-gold-metal sm:text-[56px]">
+            <h1 className="mt-4 font-display text-[44px] leading-[1] font-light tracking-[-0.015em] sm:text-[56px]">
               Istoric comenzi
             </h1>
             <p className="mt-4 max-w-[34rem] text-[15px] text-ivory/70">
@@ -54,7 +54,7 @@ export default async function OrderHistoryPage() {
 
         <section className={`${container} py-12 lg:py-16`}>
           {orders.length === 0 ? (
-            <div className="mx-auto max-w-md text-center">
+            <div className="max-w-md">
               <p className="font-display text-[26px] text-ink">Nu ai nicio comandă încă.</p>
               <p className="mt-3 text-[15px] text-stone">Când cumperi un curs, plata apare aici.</p>
               <ButtonLink href="/cursuri" className="mt-8">
@@ -62,14 +62,14 @@ export default async function OrderHistoryPage() {
               </ButtonLink>
             </div>
           ) : (
-            <ul className="divide-y divide-line border-y border-line">
+            <ul className="divide-y divide-champagne/20 border-y border-champagne/20">
               {orders.map((o) => (
                 <li key={o.id} className="grid gap-3 py-5 sm:grid-cols-[1fr_auto_auto] sm:items-center sm:gap-8">
                   <div className="min-w-0">
                     <p className="font-display text-[21px] leading-snug text-ink">{o.course.title}</p>
-                    <p className="mt-1 text-[13px] text-stone">{dateFormat.format(o.createdAt)}</p>
+                    <p className="mt-1 font-mono text-[12px] text-stone">{dateFormat.format(o.createdAt)}</p>
                   </div>
-                  <p className="text-[15px] text-ink">{formatMdl(o.amountMdl)}</p>
+                  <p className="font-mono text-[15px] text-ink">{formatMdl(o.amountMdl)}</p>
                   <div className="flex items-center gap-4 sm:justify-end">
                     <OrderStatusBadge status={o.status} />
                     {o.status === 'platita' && (

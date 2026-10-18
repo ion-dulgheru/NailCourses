@@ -20,7 +20,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       <aside className="bg-ink text-ivory lg:sticky lg:top-0 lg:flex lg:h-svh lg:flex-col">
         <div className="flex items-center justify-between px-5 pt-4 pb-3 lg:block lg:px-6 lg:pt-7 lg:pb-8">
           <Wordmark />
-          <span className="text-[10px] font-medium uppercase tracking-[0.28em] text-champagne lg:mt-3 lg:block">
+          <span className="text-[12px] font-medium text-champagne lg:mt-3 lg:block">
             Administrare
           </span>
         </div>
@@ -29,7 +29,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           <AdminNav />
         </div>
 
-        <div className="hidden border-t border-ivory/10 px-6 py-5 lg:block">
+        <div className="hidden border-t border-champagne/15 px-6 py-5 lg:block">
           <p className="truncate text-[14px] text-ivory">{fullName}</p>
           <p className="truncate text-[12px] text-ivory/45">{admin.email}</p>
           <Link
