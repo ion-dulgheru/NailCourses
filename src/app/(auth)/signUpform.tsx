@@ -14,6 +14,7 @@ import {
   inputClass,
   linkClass,
 } from "@/components/auth/form-parts";
+import { CheckEmailPanel } from "@/components/auth/email-verification";
 
 const perks = [
   { icon: ShieldCheck, label: "Plată securizată" },
@@ -29,6 +30,8 @@ export default function SignUpForm({ callbackUrl }: { callbackUrl: string }) {
 
   const loginHref =
     callbackUrl === "/" ? "/autentificare" : `/autentificare?callbackUrl=${encodeURIComponent(callbackUrl)}`;
+
+  if (data.success && data.verifyEmail) return <CheckEmailPanel email={data.verifyEmail} />;
 
   return (
     <div className="w-full max-w-[420px]">

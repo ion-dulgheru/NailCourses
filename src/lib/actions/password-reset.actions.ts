@@ -70,6 +70,8 @@ export async function resetPassword(prev: ResetFormState, formData: FormData): P
     where: { id: user.id },
     data: { password: hashSync(parsed.data.password, 10) },
   });
+  // Linkul a venit pe email, deci adresa e dovedită: un cont neconfirmat devine confirmat.
+  await prisma.user.updateMany({ where: { id: user.id, emailVerified: null }, data: { emailVerified: new Date() } });
 
   redirect("/autentificare?parola=noua");
 }

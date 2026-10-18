@@ -12,6 +12,7 @@ import {
   inputClass,
   linkClass,
 } from "@/components/auth/form-parts";
+import { ResendVerification } from "@/components/auth/email-verification";
 
 export default function LoginClient({
   callbackUrl,
@@ -73,6 +74,12 @@ export default function LoginClient({
           <SubmitButton label="Intră în cont" pendingLabel="Se verifică" />
         </div>
       </form>
+
+      {data.verifyEmail && (
+        <div className="mt-6">
+          <ResendVerification key={data.verifyEmail} email={data.verifyEmail} />
+        </div>
+      )}
 
       <div className="mt-10 border-t border-champagne/15 pt-8">
         <p className="text-[14px] text-ivory/60">Nu ai încă un cont?</p>

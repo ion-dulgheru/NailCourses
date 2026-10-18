@@ -1,6 +1,7 @@
 import NextAuth from 'next-auth';
 import { authConfig } from './auth.config';
 import Credentials from 'next-auth/providers/credentials';
+import { CredentialsSignin } from 'next-auth';
 import { prisma } from '@/lib/db';
 import { compareSync } from 'bcrypt-ts-edge';
 import { signInSchema } from '@/lib/validators';
@@ -8,6 +9,12 @@ import { isRateLimited, registerAttempt, resetAttempts } from '@/lib/rate-limit'
 
 const MAX_FAILED_LOGINS = 5;
 const LOGIN_WINDOW_MS = 60 * 1000;
+
+// Parolă corectă, dar emailul nu e confirmat: formularul de autentificare arată un mesaj separat
+// și butonul de retrimitere. Se aruncă doar după verificarea parolei, deci nu dezvăluie conturi.
+export class EmailNotVerified extends CredentialsSignin {
+  code = 'email_neconfirmat';
+}
 
 declare module 'next-auth' {
   interface User {
@@ -49,33 +56,38 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           return null;
         }
 
+        let user;
         try {
-          const user = await prisma.user.findUnique({
+          user = await prisma.user.findUnique({
             where: { email },
           });
-
-          const isPasswordValid =
-            !!user?.password && compareSync(password, user.password);
-
-          if (!user || !isPasswordValid) {
-            registerAttempt(limitKey, LOGIN_WINDOW_MS);
-            return null;
-          }
-
-          resetAttempts(limitKey);
-
-          return {
-            id: user.id,
-            email: user.email,
-            name: user.name,
-            surname: user.surname, // ✅ adăugat
-            image: user.image,
-            role: user.role,
-          };
         } catch (error) {
           console.error('Authorization error:', error);
           return null;
         }
+
+        const isPasswordValid =
+          !!user?.password && compareSync(password, user.password);
+
+        if (!user || !isPasswordValid) {
+          registerAttempt(limitKey, LOGIN_WINDOW_MS);
+          return null;
+        }
+
+        resetAttempts(limitKey);
+
+        if (!user.emailVerified) {
+          throw new EmailNotVerified();
+        }
+
+        return {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          surname: user.surname, // ✅ adăugat
+          image: user.image,
+          role: user.role,
+        };
       },
     }),
   ],
