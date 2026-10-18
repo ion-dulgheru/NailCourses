@@ -5,7 +5,7 @@ import { ArrowLeft, ArrowRight } from 'lucide-react'
 import { requireAdminPage } from '@/lib/admin'
 import { prisma } from '@/lib/db'
 import { formatDuration } from '@/lib/course-format'
-import { getStorageUsage, isStorageConfigured, STORAGE_LIMIT_BYTES } from '@/lib/storage'
+import { getStorageInfo, isStorageConfigured } from '@/lib/storage'
 import { AdminPageHeader } from '@/components/admin/ui'
 import { adminButton } from '@/components/admin/styles'
 import { BlocksEditor } from '@/components/admin/blocks-editor'
@@ -40,10 +40,7 @@ export default async function LessonContentPage({ params }: Props) {
   const lesson = await getLesson(id, lessonId)
   if (!lesson) notFound()
 
-  // Spațiul ocupat în R2, pentru limita de 10 GB la încărcare; dacă R2 nu răspunde, butonul lipsește.
-  const storage = isStorageConfigured()
-    ? await getStorageUsage().then((used) => ({ used, limit: STORAGE_LIMIT_BYTES }), () => null)
-    : null
+  const storage = await getStorageInfo()
 
   const siblings = lesson.course.lessons
   const index = siblings.findIndex((l) => l.id === lesson.id)

@@ -58,10 +58,28 @@ export async function videoExists(key: string): Promise<boolean | null> {
   }
 }
 
-// Șterge definitiv un fișier din bucket. Un fișier care nu există nu e o eroare.
-export async function deleteVideoFile(key: string) {
+// Șterge definitiv un fișier din bucket (video, PDF, copertă). Un fișier care nu există nu e o eroare.
+export async function deleteStoredFile(key: string) {
   if (!isStorageConfigured()) return;
   await getClient().send(new DeleteObjectCommand({ Bucket: process.env.R2_BUCKET, Key: key }));
+}
+
+// Conținutul unui fișier, pentru rutele care îl servesc direct (copertele). null dacă lipsește.
+export async function getStoredFile(key: string) {
+  if (!isStorageConfigured()) return null;
+  try {
+    const object = await getClient().send(new GetObjectCommand({ Bucket: process.env.R2_BUCKET, Key: key }));
+    if (!object.Body) return null;
+    return {
+      body: object.Body.transformToWebStream(),
+      contentType: object.ContentType ?? "application/octet-stream",
+      contentLength: object.ContentLength,
+    };
+  } catch (error) {
+    const status = (error as { $metadata?: { httpStatusCode?: number } }).$metadata?.httpStatusCode;
+    if (status === 404) return null;
+    throw error;
+  }
 }
 
 // Totalul ocupat în bucket, în octeți (R2 nu are un apel direct, așa că adunăm din listare).
@@ -76,6 +94,16 @@ export async function getStorageUsage(): Promise<number> {
     token = page.NextContinuationToken;
   } while (token);
   return total;
+}
+
+// Spațiul ocupat și limita, pentru butoanele de încărcare din admin; null dacă R2 nu e conectat
+// sau nu răspunde (atunci butoanele lipsesc).
+export async function getStorageInfo() {
+  if (!isStorageConfigured()) return null;
+  return getStorageUsage().then(
+    (used) => ({ used, limit: STORAGE_LIMIT_BYTES }),
+    () => null,
+  );
 }
 
 // Link de încărcare directă din browser în R2. Mărimea e inclusă în semnătură, deci R2 refuză

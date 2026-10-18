@@ -1,15 +1,17 @@
 "use server";
 
+import { randomUUID } from "node:crypto";
 import { redirect } from "next/navigation";
 import { refresh } from "next/cache";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
-import { assertAdmin, slugify } from "@/lib/admin";
+import { assertAdmin } from "@/lib/admin";
+import { slugify } from "@/lib/slug";
 import { Prisma } from "@/generated/prisma/client";
 import { SETTING_FIELDS } from "@/lib/settings";
 import { parseVideoSource } from "@/lib/video";
 import {
-  deleteVideoFile,
+  deleteStoredFile,
   getSignedUploadUrl,
   getStorageUsage,
   isStorageConfigured,
@@ -44,7 +46,11 @@ const courseSchema = z.object({
   longDescription: z.string().trim().max(5000).default(""),
   level: z.enum(["incepator", "intermediar", "avansat"], { error: "Alege nivelul" }),
   priceMdl: z.coerce.number({ error: "Prețul trebuie să fie un număr" }).int("Prețul se scrie în lei întregi").min(0).max(1_000_000),
-  coverImage: z.string().trim().min(1, "Alege o imagine de copertă"),
+  coverImage: z
+    .string()
+    .trim()
+    .min(1, "Alege o imagine de copertă")
+    .refine((v) => /^\/(images|coperte)\/[\w.-]+$/.test(v), "Alege o imagine din listă sau încarcă una"),
   coverAlt: z.string().trim().max(200).default(""),
   whatYouLearn: lines,
   forWho: lines,
@@ -98,8 +104,10 @@ export async function saveCourse(prev: AdminFormState, formData: FormData): Prom
   let courseId: string;
   try {
     if (typeof id === "string" && id) {
+      const before = await prisma.course.findUnique({ where: { id }, select: { coverImage: true } });
       await prisma.course.update({ where: { id }, data });
       courseId = id;
+      if (before && before.coverImage !== data.coverImage) await removeUnusedCover(before.coverImage);
     } else {
       const last = await prisma.course.aggregate({ _max: { position: true } });
       const created = await prisma.course.create({
@@ -133,10 +141,19 @@ async function removeUnusedVideos(videoKeys: (string | null)[]) {
     if (source?.kind !== "fisier") continue;
     const stillUsed = await prisma.lessonBlock.count({ where: { videoKey } });
     if (stillUsed) continue;
-    await deleteVideoFile(source.key).catch((error) =>
+    await deleteStoredFile(source.key).catch((error) =>
       console.error(`[r2] ștergerea fișierului ${source.key} a eșuat:`, error),
     );
   }
+}
+
+// Coperta încărcată (/coperte/…) se șterge din R2 când nu mai e folosită de niciun curs.
+// Imaginile din public/images rămân neatinse.
+async function removeUnusedCover(coverImage: string) {
+  if (!coverImage.startsWith("/coperte/")) return;
+  if (await prisma.course.count({ where: { coverImage } })) return;
+  const key = coverImage.slice(1);
+  await deleteStoredFile(key).catch((error) => console.error(`[r2] ștergerea copertei ${key} a eșuat:`, error));
 }
 
 async function videoKeysOf(where: { lesson: { courseId: string } } | { lessonId: string }) {
@@ -162,8 +179,9 @@ export async function deleteCourse(courseId: string): Promise<AdminFormState> {
   }
 
   const videoKeys = await videoKeysOf({ lesson: { courseId } });
-  await prisma.course.delete({ where: { id: courseId } });
+  const course = await prisma.course.delete({ where: { id: courseId }, select: { coverImage: true } });
   await removeUnusedVideos(videoKeys);
+  await removeUnusedCover(course.coverImage);
   redirect("/admin/cursuri");
 }
 
@@ -339,6 +357,12 @@ const UPLOAD_KINDS = {
     wrongType: "Alege un fișier PDF.",
     tooBig: "PDF-ul depășește 100 MB. Micșorează-l (ex: „Salvează ca PDF redus”) și încearcă din nou.",
   },
+  coperta: {
+    types: { "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp" } as Record<string, string>,
+    maxBytes: 5 * 1024 ** 2,
+    wrongType: "Alege o imagine JPG, PNG sau WebP.",
+    tooBig: "Imaginea depășește 5 MB. Micșoreaz-o (ex: 1600 px lățime) și încearcă din nou.",
+  },
 };
 
 export type UploadResult = { ok: true; url: string; key: string } | { ok: false; message: string };
@@ -346,8 +370,8 @@ export type UploadResult = { ok: true; url: string; key: string } | { ok: false;
 // Emite linkul de încărcare doar dacă fișierul încape în limita de 10 GB a spațiului de stocare.
 // Fișierul urcă direct din browser în R2 (nu prin server), apoi cheia se pune în bloc.
 export async function requestUpload(input: {
-  lessonId: string;
-  kind: "video" | "pdf";
+  lessonId?: string;
+  kind: "video" | "pdf" | "coperta";
   fileName: string;
   size: number;
   contentType: string;
@@ -362,11 +386,11 @@ export async function requestUpload(input: {
   if (!Number.isSafeInteger(input.size) || input.size <= 0) return { ok: false, message: "Fișierul este gol." };
   if (input.size > kind.maxBytes) return { ok: false, message: kind.tooBig };
 
-  const lesson = await prisma.lesson.findUnique({
-    where: { id: input.lessonId },
-    select: { course: { select: { slug: true } } },
-  });
-  if (!lesson) return { ok: false, message: "Lecția nu mai există." };
+  const lesson =
+    input.kind === "coperta"
+      ? null
+      : await prisma.lesson.findUnique({ where: { id: input.lessonId }, select: { course: { select: { slug: true } } } });
+  if (input.kind !== "coperta" && !lesson) return { ok: false, message: "Lecția nu mai există." };
 
   const used = await getStorageUsage();
   if (used + input.size > STORAGE_LIMIT_BYTES) {
@@ -378,6 +402,13 @@ export async function requestUpload(input: {
 
   // Nume curat și unic, ca un fișier nou să nu-l suprascrie pe altul cu același nume.
   const base = slugify(input.fileName.replace(/\.[^.]+$/, "")) || input.kind;
+
+  // Copertele sunt publice și păstrate în cache la nesfârșit: fiecare încărcare primește alt nume.
+  if (!lesson) {
+    const key = `coperte/${base.slice(0, 60)}-${randomUUID().slice(0, 8)}.${ext}`;
+    return { ok: true, url: await getSignedUploadUrl(key, input.contentType, input.size), key };
+  }
+
   let key = `cursuri/${lesson.course.slug}/${base}.${ext}`;
   for (let i = 2; ; i++) {
     const exists = await videoExists(key);

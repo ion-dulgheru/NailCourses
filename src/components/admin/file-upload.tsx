@@ -22,20 +22,24 @@ const formatSize = (bytes: number) =>
 const KINDS = {
   video: { accept: 'video/mp4,video/webm,video/quicktime', button: 'Încarcă video de pe calculator', done: 'Videoclipul a fost încărcat.' },
   pdf: { accept: 'application/pdf', button: 'Încarcă PDF de pe calculator', done: 'PDF-ul a fost încărcat.' },
+  coperta: { accept: 'image/jpeg,image/png,image/webp', button: 'Încarcă o imagine de pe calculator', done: 'Imaginea a fost încărcată.' },
 }
 
-// Urcă un fișier (video sau PDF) direct din browser în R2. Serverul verifică întâi limita de 10 GB
+// Urcă un fișier (video, PDF sau copertă) direct din browser în R2. Serverul verifică întâi limita de 10 GB
 // și dă un link semnat; la final, cheia fișierului e pusă în câmpul blocului prin `onUploaded`.
 export function FileUpload({
   lessonId,
   kind,
   storage,
   onUploaded,
+  doneHint = 'Apasă „Salvează” ca să-l adaugi în lecție.',
 }: {
-  lessonId: string
-  kind: 'video' | 'pdf'
+  lessonId?: string
+  kind: keyof typeof KINDS
   storage: StorageUsage | null
   onUploaded: (key: string) => void
+  // Mesajul după încărcare; implicit „… Apasă «Salvează» ca să-l adaugi în lecție.”
+  doneHint?: string
 }) {
   const inputRef = useRef<HTMLInputElement>(null)
   const [state, setState] = useState<UploadState>({ status: 'idle' })
@@ -129,7 +133,7 @@ export function FileUpload({
         </p>
       ) : state.status === 'done' ? (
         <p role="status" className="text-[13px] text-emerald-700">
-          {KINDS[kind].done} Apasă „Salvează” ca să-l adaugi în lecție.
+          {KINDS[kind].done} {doneHint}
         </p>
       ) : null}
     </div>

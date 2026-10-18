@@ -46,3 +46,14 @@ export async function getPublishedCourse(slug: string) {
     totalSeconds: course.lessons.reduce((sum, l) => sum + l.durationSeconds, 0),
   };
 }
+
+// Categoriile folosite deja, ca sugestii în formularul de curs din admin.
+export async function getCourseCategories() {
+  const rows = await prisma.course.findMany({
+    where: { category: { not: "" } },
+    distinct: ["category"],
+    select: { category: true },
+    orderBy: { category: "asc" },
+  });
+  return rows.map((r) => r.category);
+}

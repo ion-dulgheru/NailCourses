@@ -5,6 +5,8 @@ import { ExternalLink } from 'lucide-react'
 import { requireAdminPage } from '@/lib/admin'
 import { prisma } from '@/lib/db'
 import { listPublicImages } from '@/lib/images'
+import { getCourseCategories } from '@/lib/courses'
+import { getStorageInfo } from '@/lib/storage'
 import { AdminCard, AdminPageHeader, StatusBadge } from '@/components/admin/ui'
 import { adminButton } from '@/components/admin/styles'
 import { CourseForm } from '@/components/admin/course-form'
@@ -41,7 +43,13 @@ export default async function EditCoursePage({ params, searchParams }: Props) {
   const { id } = await params
   await requireAdminPage(`/admin/cursuri/${id}`)
 
-  const [course, images, { creat }] = await Promise.all([getCourse(id), listPublicImages(), searchParams])
+  const [course, images, categories, storage, { creat }] = await Promise.all([
+    getCourse(id),
+    listPublicImages(),
+    getCourseCategories(),
+    getStorageInfo(),
+    searchParams,
+  ])
   if (!course) notFound()
 
   return (
@@ -92,6 +100,8 @@ export default async function EditCoursePage({ params, searchParams }: Props) {
 
       <CourseForm
         images={images}
+        categories={categories}
+        storage={storage}
         course={{
           id: course.id,
           title: course.title,
